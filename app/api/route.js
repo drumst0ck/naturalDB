@@ -4,11 +4,12 @@ import { ChatOpenAI } from "@langchain/openai";
 import { NextResponse } from "next/server";
 import { createSqlQueryChain } from "langchain/chains/sql_db";
 import { QuerySqlTool } from "langchain/tools/sql";
-export async function POST(req, res, next) {
+export async function POST(req) {
   const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0 });
   /*   const MysqlDataSource = new DataSource({
     type: "mysql",
     host: "localhost",
+    
     port: 3306,
     username: "test",
     password: "test",
@@ -34,7 +35,7 @@ export async function POST(req, res, next) {
   });
   const chain = writeQuery.pipe(executeQuery);
   const response = await chain.invoke({
-    question: "Cual es el usuario que mas mensajes ha mandado?",
+    question: "Dime el ultimo mensaje registrado y el usuario que lo dijo",
   });
   console.log(response);
 
