@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
           fontSans.variable
         )}
       >
-        <main className="flex lfex-row w-full justify-center items-center">
+        <main className="flex flex-row w-full justify-center items-center p-1">
           <div className="flex flex-col w-full max-w-[1400px] items-center p-4">
             {children}
           </div>
