@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -19,12 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-  InputOTPSeparator,
-} from "@/components/ui/input-otp";
+
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 const FormSchema = z.object({
@@ -50,6 +46,7 @@ export function AddDbForm() {
   const form = useForm({
     resolver: zodResolver(FormSchema),
   });
+  const [fase, setFase] = useState("type");
 
   async function onSubmit(data) {
     await fetch("/api/database", {
@@ -70,119 +67,145 @@ export function AddDbForm() {
     });
   }
 
+  function next(actual, siguiente) {
+    const values = form.getValues();
+    if (!values[actual] || form.getFieldState(actual).error) {
+      form.setError(actual, { message: "This field is required" });
+    } else {
+      form.clearErrors();
+      setFase(siguiente);
+    }
+  }
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your current DB type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Postgres">Postgres</SelectItem>
-                  <SelectItem value="MySQL">MySQL</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                You can select the type of database you want to connect to
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="host"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Host</FormLabel>
-              <FormControl>
-                <InputOTP maxLength={9} {...field}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSeparator />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSeparator />
-                    <InputOTPSlot index={5} />
-                    <InputOTPSlot index={6} />
-                    <InputOTPSeparator />
-                    <InputOTPSlot index={7} />
-                    <InputOTPSlot index={8} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </FormControl>
-              <FormDescription>Please enter the host ip</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="port"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Port</FormLabel>
-              <FormControl>
-                <Input placeholder="1234" {...field} />
-              </FormControl>
-              <FormDescription>This is your db port.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="database"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>DB Name</FormLabel>
-              <FormControl>
-                <Input placeholder="postgres" {...field} />
-              </FormControl>
-              <FormDescription>This is your db name.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="root" {...field} />
-              </FormControl>
-              <FormDescription>This is your db username.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormDescription>This is your db password.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
+    <Form className="w-full max-w-[300px]" {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-5">
+        {fase === "type" && (
+          <>
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your current DB type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Postgres">Postgres</SelectItem>
+                      <SelectItem value="MySQL">MySQL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    You can select the type of database you want to connect to
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex flex-row w-full p-2 justify-between">
+              <Button onClick={() => next("type", "host")}>Next</Button>
+            </div>
+          </>
+        )}
+        {fase === "host" && (
+          <>
+            <FormField
+              control={form.control}
+              name="host"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Host</FormLabel>
+                  <FormControl>
+                    <Input placeholder="127.0.0.1" {...field} />
+                  </FormControl>
+                  <FormDescription>Please enter your db host.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex flex-row w-full p-2 justify-between">
+              <Button onClick={() => setFase("type")}>Back</Button>
+              <Button onClick={() => next("host", "port")}>Next</Button>
+            </div>
+          </>
+        )}
+        {fase === "port" && (
+          <>
+            <FormField
+              control={form.control}
+              name="port"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Port</FormLabel>
+                  <FormControl>
+                    <Input placeholder="1234" {...field} />
+                  </FormControl>
+                  <FormDescription>This is your db port.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex flex-row w-full p-2 justify-between">
+              <Button onClick={() => setFase("host")}>Back</Button>
+              <Button onClick={() => next("port", "final")}>Next</Button>
+            </div>
+          </>
+        )}
+        {fase === "final" && (
+          <>
+            <FormField
+              control={form.control}
+              name="database"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>DB Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="postgres" {...field} />
+                  </FormControl>
+                  <FormDescription>This is your db name.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="root" {...field} />
+                  </FormControl>
+                  <FormDescription>This is your db username.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormDescription>This is your db password.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button className="w-full block" type="submit">
+              Submit
+            </Button>
+          </>
+        )}
       </form>
     </Form>
   );
