@@ -27,8 +27,8 @@ const FormSchema = z.object({
   type: z.string({
     required_error: "Please select a DB type",
   }),
-  host: z.string().min(9, {
-    message: "Your host must be 9 characters.",
+  host: z.string({
+    required_error: "Please add your DB host",
   }),
   username: z.string().min(2, {
     message: "Username must be at least 2 characters.",
@@ -73,7 +73,7 @@ export function AddDbForm({ activador }) {
     if (!values[actual] || form.getFieldState(actual).error) {
       form.setError(actual, { message: "This field is required" });
     } else {
-      form.clearErrors();
+      form.clearErrors(actual);
       setFase(siguiente);
     }
   }
