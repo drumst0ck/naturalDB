@@ -21,7 +21,7 @@ export default async function Dashboard() {
   })
     .then((res) => res.json())
     .catch((e) => e);
-
+  console.log(test);
   return (
     <div>
       <h1>Dashboard</h1>
