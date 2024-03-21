@@ -1,11 +1,14 @@
-"use client";
 import FormContainer from "@/components/FormContainer";
 import { AddDbForm } from "@/components/AddDbForm";
-export default function Dashboard() {
-  const test = fetch("/api/connection", {
+import { auth } from "@clerk/nextjs";
+export default async function Dashboard() {
+  const { getToken } = auth();
+  const token = await getToken({ template: "test" });
+  const test = await fetch("http://localhost:3000/api/connection", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       type: "postgres",
@@ -15,8 +18,10 @@ export default function Dashboard() {
       password: "L4QysZYDFqN0Kbw2tVPpK1CsHMevhRP3",
       database: "postgres",
     }),
-  });
-  console.log(test);
+  })
+    .then((res) => res.json())
+    .catch((e) => e);
+
   return (
     <div>
       <h1>Dashboard</h1>

@@ -14,6 +14,7 @@ export async function POST(req) {
   });
   const db = await SqlDatabase.fromDataSourceParams({
     appDataSource: postgresDataSource,
-  }).catch((e) => e.error);
+  }).catch((e) => e.message);
+
   return NextResponse.json(db);
 }
