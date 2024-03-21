@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import client from "@/lib/directus";
-import { createItem } from "@directus/sdk";
+import { createItem, readItems } from "@directus/sdk";
 import { auth } from "@clerk/nextjs";
 export async function POST(req) {
   const { userId } = auth();
@@ -22,4 +22,12 @@ export async function POST(req) {
     .catch((e) => e.error);
 
   return NextResponse.json(newItem);
+}
+export async function GET() {
+  const { userId } = auth();
+  const result = await client.request(
+    readItems("db", { filter: { user: userId }, sort: ["-date_created"] })
+  );
+
+  return NextResponse.json(result);
 }
