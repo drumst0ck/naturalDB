@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
-
+import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 const fontSans = FontSans({
@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
       >
         <main className="flex flex-row w-full justify-center items-center p-1">
           <div className="flex flex-col w-full max-w-[1400px] items-center p-4">
-            {children}
+            <ClerkProvider>{children}</ClerkProvider>
           </div>
         </main>
         <Toaster />
