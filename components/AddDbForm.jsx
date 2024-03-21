@@ -42,7 +42,7 @@ const FormSchema = z.object({
   database: z.string({ required_error: "Please add your DB name" }),
 });
 
-export function AddDbForm() {
+export function AddDbForm({ activador }) {
   const form = useForm({
     resolver: zodResolver(FormSchema),
   });
@@ -57,13 +57,14 @@ export function AddDbForm() {
       body: JSON.stringify(data),
     }).then((e) => {
       toast({
-        title: "You submitted the following values:",
+        title: "Your DB has been created with the following values:",
         description: (
           <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
             <code className="text-white">{JSON.stringify(data, null, 2)}</code>
           </pre>
         ),
       });
+      activador(false);
     });
   }
 

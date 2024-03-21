@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AddDbForm } from "./AddDbForm";
 import { useState } from "react";
 import { Button } from "./ui/button";
 export default function FormContainer({ children }) {
@@ -34,7 +35,7 @@ export default function FormContainer({ children }) {
               <DialogTitle>Add new database</DialogTitle>
               <DialogDescription>Add your DB</DialogDescription>
             </DialogHeader>
-            {children}
+            <AddDbForm activador={setOpen} />
           </DialogContent>
         </Dialog>
       </>
@@ -52,7 +53,7 @@ export default function FormContainer({ children }) {
             <DrawerTitle>Add new database</DrawerTitle>
             <DrawerDescription>Add your DB</DrawerDescription>
           </DrawerHeader>
-          {children}
+          <AddDbForm activador={setOpen} />
           <DrawerFooter className="pt-2">
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
