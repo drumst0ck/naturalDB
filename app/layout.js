@@ -1,3 +1,4 @@
+"use client";
 import "@/app/globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -5,6 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import Nav from "@/components/Nav";
+import { useState } from "react";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -12,6 +15,9 @@ const fontSans = FontSans({
 });
 
 export default function RootLayout({ children }) {
+  const [client] = useState(
+    new QueryClient({ defaultOptions: { queries: { staleTime: 5000 } } })
+  );
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -31,7 +37,10 @@ export default function RootLayout({ children }) {
             <Nav />
             <main className="flex flex-row w-full justify-center items-center p-1">
               <div className="flex flex-col w-full max-w-[1400px] items-center p-4">
-                {children}
+                <QueryClientProvider client={client}>
+                  {" "}
+                  {children}
+                </QueryClientProvider>
               </div>
             </main>
           </ClerkProvider>

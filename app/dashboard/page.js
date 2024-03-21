@@ -1,6 +1,7 @@
 import FormContainer from "@/components/FormContainer";
 import { AddDbForm } from "@/components/AddDbForm";
 import { auth } from "@clerk/nextjs";
+import DBTable from "@/components/DbTable";
 export default async function Dashboard() {
   const { getToken } = auth();
   const token = await getToken({ template: "test" });
@@ -21,13 +22,14 @@ export default async function Dashboard() {
   })
     .then((res) => res.json())
     .catch((e) => e);
-  console.log(test);
+
   return (
     <div>
       <h1>Dashboard</h1>
       <FormContainer>
         <AddDbForm />
       </FormContainer>
+      <DBTable />
     </div>
   );
 }
