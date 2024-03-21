@@ -55,17 +55,21 @@ export function AddDbForm({ activador }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    }).then((e) => {
-      toast({
-        title: "Your DB has been created with the following values:",
-        description: (
-          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-            <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-          </pre>
-        ),
-      });
-      activador(false);
-    });
+    })
+      .then((e) => {
+        toast({
+          title: "Your DB has been created with the following values:",
+          description: (
+            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+              <code className="text-white">
+                {JSON.stringify(data, null, 2)}
+              </code>
+            </pre>
+          ),
+        });
+        activador(false);
+      })
+      .catch((e) => form.setError("type", { message: e.message }));
   }
 
   function next(actual, siguiente) {
