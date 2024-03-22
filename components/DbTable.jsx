@@ -30,13 +30,27 @@ function DbRow({ db }) {
         }),
       }).then((res) => res.json()),
   });
-  if (isLoading) return <div>Loading...</div>;
-  console.log(data);
+
+  function Status() {
+    if (isLoading) return <div>Loading...</div>;
+    if (data.lc) {
+      return (
+        <div className="flex flex-row justify-center rounded-full items-center h-[20px] w-[20px] bg-green-400"></div>
+      );
+    } else {
+      return (
+        <div className="flex flex-row justify-center rounded-full items-center h-[20px] w-[20px] bg-red-400"></div>
+      );
+    }
+  }
+
   return (
     <TableRow>
       <TableCell>{db.database}</TableCell>
       <TableCell>{db.type}</TableCell>
-      <TableCell></TableCell>
+      <TableCell>
+        <Status />
+      </TableCell>
       <TableCell className="text-right"></TableCell>
     </TableRow>
   );
@@ -48,7 +62,7 @@ export default function DBTable() {
     queryFn: () => fetch("/api/database").then((res) => res.json()),
   });
   if (isLoading) return <div>Loading...</div>;
-  console.log(data);
+
   return (
     <>
       <Table>
@@ -58,7 +72,7 @@ export default function DBTable() {
             <TableHead className="w-[100px]">Database</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
+            <TableHead className="text-right"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
