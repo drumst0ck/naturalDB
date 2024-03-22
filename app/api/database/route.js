@@ -23,7 +23,16 @@ export async function POST(req) {
 
   return NextResponse.json(newItem);
 }
-export async function GET() {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (id) {
+    const result = await client
+      .request(readItems("db", { filter: { id: id } }))
+      .catch((e) => e.error);
+
+    return NextResponse.json(result);
+  }
   const { userId } = auth();
   const result = await client.request(
     readItems("db", { filter: { user: userId }, sort: ["-date_created"] })

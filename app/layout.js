@@ -38,7 +38,6 @@ export default function RootLayout({ children }) {
             <main className="flex flex-row w-full justify-center items-center p-1">
               <div className="flex flex-col w-full max-w-[1400px] items-center p-4">
                 <QueryClientProvider client={client}>
-                  {" "}
                   {children}
                 </QueryClientProvider>
               </div>

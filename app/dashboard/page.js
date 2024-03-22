@@ -5,6 +5,7 @@ import DBTable from "@/components/DbTable";
 export default async function Dashboard() {
   /*   const { getToken } = auth();
   const token = await getToken({ template: "test" });
+  console.log(token);
   const test = await fetch("http://localhost:3000/api/connection", {
     method: "POST",
     headers: {
