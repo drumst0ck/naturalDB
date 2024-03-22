@@ -53,13 +53,13 @@ function DbRow({ db }) {
   return (
     <TableRow>
       <TableCell className="text-left">
-        <Link className="w-full" href={`/db/${db.id}`}>
+        <Link className="w-full" href={data.lc ? `/db/${db.id}` : "#"}>
           {db.database}
         </Link>
       </TableCell>
       <TableCell className="text-center">
         {" "}
-        <Link className="w-full" href={`/db/${db.id}`}>
+        <Link className="w-full" href={data.lc ? `/db/${db.id}` : "#"}>
           {db.type}
         </Link>
       </TableCell>

@@ -5,7 +5,6 @@ import { useState } from "react";
 export function Chat({ db }) {
   const [message, setMessage] = useState("");
   const [chats, setChats] = useState([]);
-  console.log(chats);
   async function sendMessage() {
     const respuesta = await fetch(`/api/`, {
       method: "POST",
