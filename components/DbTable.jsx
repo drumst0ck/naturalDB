@@ -51,39 +51,41 @@ function DbRow({ db }) {
   }
 
   return (
-    <TableRow>
-      <TableCell className="text-left">
-        <Link className="w-full" href={!data?.lc ? `#` : `/db/${db.id}`}>
-          {db.database}
-        </Link>
-      </TableCell>
-      <TableCell className="text-center">
-        {" "}
-        <Link className="w-full" href={!data?.lc ? `#` : `/db/${db.id}`}>
-          {db.type}
-        </Link>
-      </TableCell>
-      <TableCell className="text-center">
-        <Status />
-      </TableCell>
-      <TableCell className="text-right">
-        <button
-          onClick={() =>
-            fetch("/api/database", {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                id: db.id,
-              }),
-            })
-          }
-        >
-          <Trash />
-        </button>
-      </TableCell>
-    </TableRow>
+    <Suspense fallback={<div>Loading...</div>}>
+      <TableRow>
+        <TableCell className="text-left">
+          <Link className="w-full" href={!data?.lc ? `#` : `/db/${db.id}`}>
+            {db.database}
+          </Link>
+        </TableCell>
+        <TableCell className="text-center">
+          {" "}
+          <Link className="w-full" href={!data?.lc ? `#` : `/db/${db.id}`}>
+            {db.type}
+          </Link>
+        </TableCell>
+        <TableCell className="text-center">
+          <Status />
+        </TableCell>
+        <TableCell className="text-right">
+          <button
+            onClick={() =>
+              fetch("/api/database", {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  id: db.id,
+                }),
+              })
+            }
+          >
+            <Trash />
+          </button>
+        </TableCell>
+      </TableRow>
+    </Suspense>
   );
 }
 
@@ -96,28 +98,31 @@ export default function DBTable() {
 
   return (
     <>
-      <Table className="max-w-[800px]">
-        <TableCaption>A list of all your databases.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-left">Database</TableHead>
-            <TableHead className="text-center">Type</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-right"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((db) => {
-            return <DbRow key={db.database} db={db} />;
-          })}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell colSpan={3}>Total</TableCell>
-            <TableCell className="text-right">{data.length}</TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Table className="max-w-[800px]">
+          <TableCaption>A list of all your databases.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left">Database</TableHead>
+              <TableHead className="text-center">Type</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-right"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.length > 0 &&
+              data.map((db) => {
+                return <DbRow key={db.database} db={db} />;
+              })}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={3}>Total</TableCell>
+              <TableCell className="text-right">{data.length}</TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </Suspense>
     </>
   );
 }

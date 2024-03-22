@@ -4,6 +4,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { NextResponse } from "next/server";
 import { createSqlQueryChain } from "langchain/chains/sql_db";
 import { QuerySqlTool } from "langchain/tools/sql";
+import { LangChainAdapter, StreamingTextResponse } from "ai";
 export async function POST(req) {
   const json = await req.json();
   const { type, host, username, port, database, password, mensaje } = json;
@@ -26,6 +27,9 @@ export async function POST(req) {
     db,
     dialect: type,
   });
+  /*   return new StreamingTextResponse(
+    LangChainAdapter.adapt(writeQuery.pipe(executeQuery))
+  ); */
   const chain = writeQuery.pipe(executeQuery);
   const response = await chain.invoke({
     question: mensaje,
