@@ -24,12 +24,19 @@ export default async function Dashboard() {
     .catch((e) => e);
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <FormContainer>
-        <AddDbForm />
-      </FormContainer>
-      <DBTable />
-    </div>
+    <>
+      <div className="flex flex-row justify-center items-center w-full p-2">
+        <div className="flex flex-col w-full items-center">
+          <FormContainer>
+            <AddDbForm />
+          </FormContainer>
+          <div className="flex flex-row w-full justify-center">
+            <div className="flex flex-col max-w-[1200px] w-full items-center">
+              <DBTable />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

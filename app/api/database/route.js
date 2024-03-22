@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import client from "@/lib/directus";
-import { createItem, readItems } from "@directus/sdk";
+import { createItem, readItems, deleteItem } from "@directus/sdk";
 import { auth } from "@clerk/nextjs";
 export async function POST(req) {
   const { userId } = auth();
@@ -28,6 +28,17 @@ export async function GET() {
   const result = await client.request(
     readItems("db", { filter: { user: userId }, sort: ["-date_created"] })
   );
+
+  return NextResponse.json(result);
+}
+export async function DELETE(req) {
+  const { userId } = auth();
+  const json = await req.json();
+  const { id } = json;
+
+  const result = await client
+    .request(deleteItem("db", id))
+    .catch((e) => e.error);
 
   return NextResponse.json(result);
 }
