@@ -11,6 +11,37 @@ import {
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 
+function DbRow({ db }) {
+  const { data, isLoading } = useQuery({
+    queryKey: [`connection:${db.id}`],
+    queryFn: () =>
+      fetch("/api/connection", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: db.type,
+          host: db.host,
+          username: db.username,
+          port: db.port,
+          database: db.database,
+          password: db.password,
+        }),
+      }).then((res) => res.json()),
+  });
+  if (isLoading) return <div>Loading...</div>;
+  console.log(data);
+  return (
+    <TableRow>
+      <TableCell>{db.database}</TableCell>
+      <TableCell>{db.type}</TableCell>
+      <TableCell></TableCell>
+      <TableCell className="text-right"></TableCell>
+    </TableRow>
+  );
+}
+
 export default function DBTable() {
   const { data, isLoading } = useQuery({
     queryKey: ["database"],
@@ -31,14 +62,9 @@ export default function DBTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((db) => (
-            <TableRow key={db.database}>
-              <TableCell className="font-medium">{db.database}</TableCell>
-              <TableCell>{db.type}</TableCell>
-              <TableCell></TableCell>
-              <TableCell className="text-right"></TableCell>
-            </TableRow>
-          ))}
+          {data.map((db) => {
+            return <DbRow key={db.database} db={db} />;
+          })}
         </TableBody>
         <TableFooter>
           <TableRow>

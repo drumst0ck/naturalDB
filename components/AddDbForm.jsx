@@ -102,8 +102,8 @@ export function AddDbForm({ activador }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Postgres">Postgres</SelectItem>
-                      <SelectItem value="MySQL">MySQL</SelectItem>
+                      <SelectItem value="postgres">Postgres</SelectItem>
+                      <SelectItem value="mysql">MySQL</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
