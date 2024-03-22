@@ -29,7 +29,7 @@ export function Chat({ db }) {
       {chats.map((chat) => (
         <div
           key={chat.id}
-          className="dark:bg-white bg-slate-500 p-2 rounded-lg"
+          className="dark:bg-white bg-slate-500 p-2 rounded-lg max-w-[800px] overflow-x-scroll"
         >
           <p className="dark:text-black text-white">{chat}</p>
         </div>
