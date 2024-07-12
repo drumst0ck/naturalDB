@@ -165,7 +165,7 @@ I am ready to help you with queries related to this database, what would you lik
                     <div className="flex justify-start">
                         <div className="bg-gray-200 text-black max-w-sm p-4 rounded-lg flex items-center space-x-2">
                             <Loader2 className="h-4 w-4 animate-spin"/>
-                            <p>I'll need a second to take a look at this...</p>
+                            <p>{"I'll need a second to take a look at this..."}</p>
                         </div>
                     </div>
                 )}
