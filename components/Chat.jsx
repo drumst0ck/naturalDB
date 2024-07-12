@@ -1,63 +1,193 @@
-"use client";
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 import { useChat } from 'ai/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Play } from 'lucide-react';
 
 export function Chat({ db }) {
-    const [error, setError] = useState(null);
-    const { messages, input, handleInputChange, handleSubmit } = useChat({
+    const [dbSchema, setDbSchema] = useState(null);
+    const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
         api: '/api/chat',
         initialMessages: [],
         body: { dbConfig: db },
-        onError: (error) => {
-            console.error("API Error:", error);
-            setError("An error occurred while communicating with the API.");
-        },
     });
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        setError(null);
-        try {
-            console.log("Sending request with:", {
-                dbConfig: db,
-                prompt: input
-            });
-            await handleSubmit(e);
-        } catch (error) {
-            console.error("Submission Error:", error);
-            setError("Failed to send the message. Please try again.");
-        }
+    const [queryResult, setQueryResult] = useState(null);
+    const [isExecuting, setIsExecuting] = useState(false);
+    const messagesEndRef = useRef(null);
+    const formRef = useRef(null);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+    const isSelectQuery = (query) => {
+        return /^SELECT/i.test(query.trim());
     };
 
-    return (
-        <div className="grid w-full gap-2">
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">Error:</strong>
-                    <span className="block sm:inline"> {error}</span>
-                </div>
-            )}
-            <div className="flex flex-col gap-2">
-                {messages.map((message) => (
-                    <div
-                        key={message.id}
-                        className={`p-2 rounded-lg max-w-[800px]  ${
-                            message.role === 'user' ? 'bg-blue-200 text-black ml-auto' : 'bg-gray-200 text-black'
-                        }`}
+    const executeQuery = async (query) => {
+        if (!isSelectQuery(query)) {
+            setQueryResult("Solo se permiten consultas SELECT por razones de seguridad.");
+            return;
+        }
+
+        setIsExecuting(true);
+        try {
+            const response = await fetch('/api/execute-query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query, dbConfig: db }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la ejecución de la consulta');
+            }
+
+            const result = await response.json();
+            setQueryResult(JSON.stringify(result, null, 2));
+        } catch (error) {
+            setQueryResult(`Error: ${error.message}`);
+        } finally {
+            setIsExecuting(false);
+        }
+    };
+    useEffect(() => {
+        // Función para obtener el esquema de la base de datos
+        const fetchDbSchema = async () => {
+            try {
+                const response = await fetch('/api/get-db-schema', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(db),
+                });
+                const schema = await response.text(); // Cambiado a text() en lugar de json()
+                setDbSchema(schema);
+
+                // Generar el mensaje inicial de la IA con el esquema
+                const initialAIMessage = {
+                    id: 'initial-message',
+                    role: 'assistant',
+                    content: `¡Hola! He analizado el esquema de tu base de datos. Aquí está un resumen:
+
+${formatSchemaForDisplay(schema)}
+
+Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Qué te gustaría saber?`
+                };
+
+                setMessages([initialAIMessage]);
+            } catch (error) {
+                console.error('Error fetching database schema:', error);
+                setMessages([{
+                    id: 'error-message',
+                    role: 'assistant',
+                    content: 'Lo siento, hubo un problema al obtener el esquema de la base de datos. ¿En qué puedo ayudarte?'
+                }]);
+            }
+        };
+
+        fetchDbSchema();
+    }, [db, setMessages]);
+
+
+    useEffect(scrollToBottom, [messages]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            formRef.current.requestSubmit();
+        }
+    };
+    const formatSchemaForDisplay = (schema) => {
+        if (!schema) return 'Esquema no disponible';
+        schema = schema.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+        const match = schema.match(/CREATE TABLE (\w+) \(([\s\S]+)\);/);
+        if (!match) return 'Formato de esquema no reconocido';
+
+        const [, tableName, columnsString] = match;
+        const columns = columnsString
+            .split(',')
+            .map(col => col.trim())
+            .filter(col => col)
+            .map(col => `  ${col}`);
+        return `Tabla: ${tableName}\n\nColumnas:\n${columns.join('\n')}`;;
+    };
+    const onSubmit = (e) => {
+        e.preventDefault();
+        handleSubmit(e);
+    };
+    const renderMessage = (message) => {
+        const isSQL = message.content.includes('SELECT');
+        return (
+            <div className={`max-w-sm p-4 rounded-lg ${
+                message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
+            }`}>
+                <p className="whitespace-pre-wrap">{message.content}</p>
+                {isSQL && (
+                    <Button
+                        onClick={() => executeQuery(message.content)}
+                        disabled={isExecuting}
+                        className="mt-2"
                     >
-                        <p>{message.content}</p>
-                    </div>
-                ))}
+                        {isExecuting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                        {isExecuting ? 'Ejecutando...' : 'Ejecutar Query'}
+                    </Button>
+                )}
             </div>
-            <form onSubmit={onSubmit} className="flex flex-col gap-2">
-                <Textarea
-                    value={input}
-                    onChange={handleInputChange}
-                    placeholder="Type your message here."
-                />
-                <Button type="submit">Send message</Button>
+        );
+    };
+    return (
+        <div className="flex flex-col h-[600px] w-full max-w-2xl mx-auto">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <AnimatePresence>
+                    {messages.map((message) => (
+                        <motion.div
+                            key={message.id}
+                            initial={{opacity: 0, y: 20}}
+                            animate={{opacity: 1, y: 0}}
+                            exit={{opacity: 0, y: -20}}
+                            transition={{duration: 0.3}}
+                            className={`flex ${
+                                message.role === 'user' ? 'justify-end' : 'justify-start'
+                            }`}
+                        >
+                            {renderMessage(message)}
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+                {queryResult && (
+                    <div className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
+                        <pre className="text-black">{queryResult}</pre>
+                    </div>
+                )}
+                {isLoading && (
+                    <div className="flex justify-start">
+                        <div className="bg-gray-200 text-black max-w-sm p-4 rounded-lg flex items-center space-x-2">
+                            <Loader2 className="h-4 w-4 animate-spin"/>
+                            <p>Pensando...</p>
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef}/>
+            </div>
+            <form ref={formRef} onSubmit={onSubmit} className="p-4 border-t">
+                <div className="flex space-x-4">
+                    <Textarea
+                        value={input}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Escribe tu mensaje aquí. Presiona Enter para enviar, Shift+Enter para nueva línea."
+                        className="flex-1"
+                        rows={1}
+                    />
+                    <Button type="submit" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Enviar'}
+                    </Button>
+                </div>
             </form>
         </div>
     );
 }
+
+export default Chat;
