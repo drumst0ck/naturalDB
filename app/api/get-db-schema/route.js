@@ -1,10 +1,10 @@
-// pages/api/get-db-schema.js
 import { NextResponse } from 'next/server';
 import getDBSchema from '../../../lib/getDBSchema';
 
 export async function POST(req) {
     try {
         const dbConfig = await req.json();
+        console.log(dbConfig);
         const schema = await getDBSchema(dbConfig);
         return NextResponse.json(schema);
     } catch (error) {

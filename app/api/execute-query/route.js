@@ -1,7 +1,5 @@
-
 import { NextResponse } from 'next/server';
 import { Pool } from 'pg';
-
 export async function POST(req) {
     try {
         const { query, dbConfig } = await req.json();

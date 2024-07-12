@@ -5,7 +5,7 @@ export async function POST(req) {
   const json = await req.json();
   const { type, host, username, port, database, password } = json;
   const postgresDataSource = new DataSource({
-    type: type,
+    type: "postgres",
     host: host,
     port: port,
     username: username,
