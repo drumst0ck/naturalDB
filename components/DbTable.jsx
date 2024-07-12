@@ -12,6 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
 import Link from "next/link";
+import {Suspense} from "react";
 
 function DbRow({ db }) {
   const { data, isLoading } = useQuery({
