@@ -35,7 +35,6 @@ function DbRow({ db, onDelete }) {
   const { data: isConnected, isLoading, isError } = useQuery({
     queryKey: ['dbConnection', db.id],
     queryFn: () => checkDatabaseConnection(db),
-    refetchInterval: 30000, // Recheck every 30 seconds
   });
   return (
       <TableRow>
@@ -79,7 +78,6 @@ export default function DBTable() {
   const { data: databases, isLoading } = useQuery({
     queryKey: ["databases"],
     queryFn: localStorageDBManager.getAllDBs,
-    // Ensure the query updates frequently
     refetchInterval: 1000,
   });
 

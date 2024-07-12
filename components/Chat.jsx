@@ -6,7 +6,6 @@ import { useChat } from 'ai/react';
 
 export function Chat({ db }) {
     const [error, setError] = useState(null);
-
     const { messages, input, handleInputChange, handleSubmit } = useChat({
         api: '/api/chat',
         initialMessages: [],
@@ -16,7 +15,6 @@ export function Chat({ db }) {
             setError("An error occurred while communicating with the API.");
         },
     });
-
     const onSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -44,7 +42,7 @@ export function Chat({ db }) {
                 {messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`p-2 rounded-lg max-w-[800px] overflow-x-scroll ${
+                        className={`p-2 rounded-lg max-w-[800px]  ${
                             message.role === 'user' ? 'bg-blue-200 text-black ml-auto' : 'bg-gray-200 text-black'
                         }`}
                     >

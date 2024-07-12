@@ -10,23 +10,15 @@ const openai = new OpenAIApi(config);
 
 export async function POST(req) {
     try {
-        console.log("Received request");
         const body = await req.json();
-        console.log("Request body:", body);
-
         const { messages, dbConfig } = body;
-
         if (!dbConfig || !messages || messages.length === 0) {
             console.error("Missing dbConfig or messages");
             return NextResponse.json({ error: 'Missing database configuration or messages.' }, { status: 400 });
         }
 
         const prompt = messages[messages.length - 1].content;
-        console.log("Extracted prompt:", prompt);
-
         const dbSchema = await getDBSchema(dbConfig);
-        console.log("Generated DB Schema");
-
         const systemMessage = `You are an AI assistant that generates SQL queries based on natural language requests. 
         Use the following database schema to generate accurate SQL queries:
 
@@ -54,11 +46,7 @@ export async function POST(req) {
                 { role: 'user', content: prompt }
             ]
         });
-        console.log("Received response from OpenAI");
-
         const stream = OpenAIStream(response);
-        console.log("Created OpenAIStream");
-
         return new StreamingTextResponse(stream);
     } catch (error) {
         console.error('Error in SQL generation:', error);

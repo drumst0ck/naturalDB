@@ -1,6 +1,5 @@
 import FormContainer from "@/components/FormContainer";
 import { AddDbForm } from "@/components/AddDbForm";
-import { auth } from "@clerk/nextjs";
 import { Suspense } from "react";
 import DBTable from "@/components/DbTable";
 export default async function Dashboard() {
