@@ -96,11 +96,10 @@ export function AddDbForm({ activador }) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="postgres">Postgres</SelectItem>
-                      <SelectItem value="mysql">MySQL</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    You can select the type of database you want to connect to
+                    More compatibilities are under development
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

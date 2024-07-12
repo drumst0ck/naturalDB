@@ -25,7 +25,7 @@ export function Chat({ db }) {
 
     const executeQuery = async (query) => {
         if (!isSelectQuery(query)) {
-            setQueryResult("Solo se permiten consultas SELECT por razones de seguridad.");
+            setQueryResult("Only SELECT queries are allowed for security reasons.");
             return;
         }
 
@@ -40,7 +40,7 @@ export function Chat({ db }) {
             });
 
             if (!response.ok) {
-                throw new Error('Error en la ejecución de la consulta');
+                throw new Error('Error in query execution');
             }
 
             const result = await response.json();
@@ -69,11 +69,11 @@ export function Chat({ db }) {
                 const initialAIMessage = {
                     id: 'initial-message',
                     role: 'assistant',
-                    content: `¡Hola! He analizado el esquema de tu base de datos. Aquí está un resumen:
+                    content: `Hi! I have analyzed your database schema. Here is a summary:
 
 ${formatSchemaForDisplay(schema)}
 
-Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Qué te gustaría saber?`
+I am ready to help you with queries related to this database, what would you like to know?`
                 };
 
                 setMessages([initialAIMessage]);
@@ -82,7 +82,7 @@ Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Q
                 setMessages([{
                     id: 'error-message',
                     role: 'assistant',
-                    content: 'Lo siento, hubo un problema al obtener el esquema de la base de datos. ¿En qué puedo ayudarte?'
+                    content: 'Sorry, there was a problem getting the schema from the database, how can I help you?'
                 }]);
             }
         };
@@ -100,10 +100,10 @@ Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Q
         }
     };
     const formatSchemaForDisplay = (schema) => {
-        if (!schema) return 'Esquema no disponible';
+        if (!schema) return 'Scheme not available';
         schema = schema.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
         const match = schema.match(/CREATE TABLE (\w+) \(([\s\S]+)\);/);
-        if (!match) return 'Formato de esquema no reconocido';
+        if (!match) return 'Unrecognized scheme format';
 
         const [, tableName, columnsString] = match;
         const columns = columnsString
@@ -131,7 +131,7 @@ Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Q
                         className="mt-2"
                     >
                         {isExecuting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-                        {isExecuting ? 'Ejecutando...' : 'Ejecutar Query'}
+                        {isExecuting ? 'Executing...' : 'Execute Query'}
                     </Button>
                 )}
             </div>
@@ -165,7 +165,7 @@ Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Q
                     <div className="flex justify-start">
                         <div className="bg-gray-200 text-black max-w-sm p-4 rounded-lg flex items-center space-x-2">
                             <Loader2 className="h-4 w-4 animate-spin"/>
-                            <p>Pensando...</p>
+                            <p>I'll need a second to take a look at this...</p>
                         </div>
                     </div>
                 )}
@@ -177,12 +177,12 @@ Estoy listo para ayudarte con consultas relacionadas con esta base de datos. ¿Q
                         value={input}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
-                        placeholder="Escribe tu mensaje aquí. Presiona Enter para enviar, Shift+Enter para nueva línea."
+                        placeholder="Type your message here. Press Enter to send, Shift+Enter for new line."
                         className="flex-1"
                         rows={1}
                     />
                     <Button type="submit" disabled={isLoading}>
-                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Enviar'}
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : 'Send'}
                     </Button>
                 </div>
             </form>
