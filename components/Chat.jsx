@@ -2,43 +2,64 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { useChat } from 'ai/react';
+
 export function Chat({ db }) {
-  const [message, setMessage] = useState("");
-  const [chats, setChats] = useState([]);
-  async function sendMessage() {
-    const respuesta = await fetch(`/api/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: db.type,
-        host: db.host,
-        port: db.port,
-        username: db.username,
-        password: db.password,
-        database: db.database,
-        mensaje: message,
-      }),
-    })
-      .then((res) => res.json())
-      .then((e) => setChats([...chats, e]));
-  }
-  return (
-    <div className="grid w-full gap-2">
-      {chats.map((chat) => (
-        <div
-          key={chat.id}
-          className="dark:bg-white bg-slate-500 p-2 rounded-lg max-w-[800px] overflow-x-scroll"
-        >
-          <p className="dark:text-black text-white">{chat}</p>
+    const [error, setError] = useState(null);
+
+    const { messages, input, handleInputChange, handleSubmit } = useChat({
+        api: '/api/chat',
+        initialMessages: [],
+        body: { dbConfig: db },
+        onError: (error) => {
+            console.error("API Error:", error);
+            setError("An error occurred while communicating with the API.");
+        },
+    });
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        try {
+            console.log("Sending request with:", {
+                dbConfig: db,
+                prompt: input
+            });
+            await handleSubmit(e);
+        } catch (error) {
+            console.error("Submission Error:", error);
+            setError("Failed to send the message. Please try again.");
+        }
+    };
+
+    return (
+        <div className="grid w-full gap-2">
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error:</strong>
+                    <span className="block sm:inline"> {error}</span>
+                </div>
+            )}
+            <div className="flex flex-col gap-2">
+                {messages.map((message) => (
+                    <div
+                        key={message.id}
+                        className={`p-2 rounded-lg max-w-[800px] overflow-x-scroll ${
+                            message.role === 'user' ? 'bg-blue-200 text-black ml-auto' : 'bg-gray-200 text-black'
+                        }`}
+                    >
+                        <p>{message.content}</p>
+                    </div>
+                ))}
+            </div>
+            <form onSubmit={onSubmit} className="flex flex-col gap-2">
+                <Textarea
+                    value={input}
+                    onChange={handleInputChange}
+                    placeholder="Type your message here."
+                />
+                <Button type="submit">Send message</Button>
+            </form>
         </div>
-      ))}
-      <Textarea
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type your message here."
-      />
-      <Button onClick={() => sendMessage()}>Send message</Button>
-    </div>
-  );
+    );
 }

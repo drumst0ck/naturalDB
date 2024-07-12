@@ -2,25 +2,30 @@ import { NextResponse } from 'next/server';
 import { OpenAIStream, StreamingTextResponse } from 'ai';
 import { Configuration, OpenAIApi } from 'openai-edge';
 import getDBSchema from '../../../lib/getDBSchema';
+
 const config = new Configuration({
     apiKey: process.env.OPENAI_API_KEY
 });
 const openai = new OpenAIApi(config);
 
-
-const dbConfig = {
-    user: "drumstock",
-    host: "157.90.123.33",
-    database: "postgres",
-    password: "Gestion_2020",
-    port: parseInt("10912"),
-};
-
 export async function POST(req) {
     try {
-        const { prompt } = await req.json();
+        console.log("Received request");
+        const body = await req.json();
+        console.log("Request body:", body);
+
+        const { messages, dbConfig } = body;
+
+        if (!dbConfig || !messages || messages.length === 0) {
+            console.error("Missing dbConfig or messages");
+            return NextResponse.json({ error: 'Missing database configuration or messages.' }, { status: 400 });
+        }
+
+        const prompt = messages[messages.length - 1].content;
+        console.log("Extracted prompt:", prompt);
 
         const dbSchema = await getDBSchema(dbConfig);
+        console.log("Generated DB Schema");
 
         const systemMessage = `You are an AI assistant that generates SQL queries based on natural language requests. 
         Use the following database schema to generate accurate SQL queries:
@@ -36,7 +41,9 @@ export async function POST(req) {
         - Use $tablename for table names when appropriate
         - Use $columnname for column names when appropriate
         - Use $value for any other specific values that might need to be substituted
-
+        - You should always answer in the language you are asked to speak.
+        
+        If the question is not related to databases, respond with a humorous message suggesting the user to try ChatGPT instead, while maintaining your role as a database specialist. Be creative and funny in your response.
         This will allow for easy substitution of these variables later. Do not use quotes around these variables unless specifically required by the SQL syntax.`;
 
         const response = await openai.createChatCompletion({
@@ -44,13 +51,17 @@ export async function POST(req) {
             stream: true,
             messages: [
                 { role: 'system', content: systemMessage },
-                { role: 'user', content: "Cual es el usuario con mas mensajes" }
+                { role: 'user', content: prompt }
             ]
         });
+        console.log("Received response from OpenAI");
+
         const stream = OpenAIStream(response);
+        console.log("Created OpenAIStream");
+
         return new StreamingTextResponse(stream);
     } catch (error) {
         console.error('Error in SQL generation:', error);
-        return NextResponse.json({ error: 'An error occurred while generating SQL.' }, { status: 500 });
+        return NextResponse.json({ error: 'An error occurred while generating SQL.', details: error.message }, { status: 500 });
     }
 }
