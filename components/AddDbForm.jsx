@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { localStorageDBManager } from "@/lib/localStorageDBManager";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Form,
   FormControl,
@@ -43,33 +45,24 @@ const FormSchema = z.object({
 });
 
 export function AddDbForm({ activador }) {
+  const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(FormSchema),
   });
   const [fase, setFase] = useState("type");
 
   async function onSubmit(data) {
-    await fetch("/api/database", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((e) => {
-        toast({
-          title: "Your DB has been created with the following values:",
-          description: (
-            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-              <code className="text-white">
-                {JSON.stringify(data, null, 2)}
-              </code>
-            </pre>
-          ),
-        });
-        activador(false);
-      })
-      .catch((e) => form.setError("type", { message: e.message }));
+     localStorageDBManager.saveToDB(data);
+    queryClient.invalidateQueries(["databases"]);
+    toast({
+      title: "Your DB has been added with the following values:",
+      description: (
+          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+    });
+    activador(false);
   }
 
   function next(actual, siguiente) {

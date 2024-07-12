@@ -1,37 +1,29 @@
-import { auth } from "@clerk/nextjs";
+"use client";
+
+import { useEffect, useState } from 'react';
 import { Chat } from "@/components/Chat";
-async function generateStaticParams() {
-  const { getToken } = auth();
-  const token = await getToken({ template: "test" });
-  const posts = await fetch(`http://localhost:3000/api/database`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => res.json());
-  return posts.map((post) => ({
-    id: post.id,
-  }));
-}
-export default async function Page({ params }) {
-  const { getToken } = auth();
-  const token = await getToken({ template: "test" });
+import { localStorageDBManager } from "@/lib/localStorageDBManager";
+
+export default function Page({ params }) {
   const { id } = params;
-  const db = await fetch(`http://localhost:3000/api/database?id=${id}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-    .then((res) => res.json())
-    .catch((err) => console.log(err));
+  const [db, setDb] = useState(null);
+
+  useEffect(() => {
+    const dbInfo = localStorageDBManager.getDBById(id);
+    setDb(dbInfo);
+  }, [id]);
+
+  if (!db) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
-      <div className="flex flex-row mt-9 justify-center items-center w-full p-2">
-        <div className="flex flex-col w-full max-w-[700px] items-center">
-          <Chat db={db[0]} />
+      <>
+        <div className="flex flex-row mt-9 justify-center items-center w-full p-2">
+          <div className="flex flex-col w-full max-w-[700px] items-center">
+            <Chat db={db} />
+          </div>
         </div>
-      </div>
-    </>
+      </>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Table,
   TableBody,
@@ -9,96 +10,87 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
 import Link from "next/link";
-import {Suspense} from "react";
-
-function DbRow({ db }) {
-  const { data, isLoading } = useQuery({
-    queryKey: [`connection:${db.id}`],
-    queryFn: () =>
-      fetch("/api/connection", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: db.type,
-          host: db.host,
-          username: db.username,
-          port: db.port,
-          database: db.database,
-          password: db.password,
-        }),
-      }).then((res) => res.json()),
+import { Suspense } from "react";
+import { localStorageDBManager } from "@/lib/localStorageDBManager";
+const checkDatabaseConnection = async (db) => {
+  const response = await fetch('/api/check-connection', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(db),
   });
 
-  function Status() {
-    if (isLoading) return <div>Loading...</div>;
-    if (data.lc) {
-      return (
-        <div className="w-full flex justify-center">
-          <div className="flex flex-row justify-center rounded-full items-center h-[20px] w-[20px] bg-green-400"></div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="w-full flex justify-center">
-          <div className="flex flex-row justify-center rounded-full items-center h-[20px] w-[20px] bg-red-400"></div>
-        </div>
-      );
-    }
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
   }
 
+  const data = await response.json();
+  return data.connected;
+};
+function DbRow({ db, onDelete }) {
+  const { data: isConnected, isLoading, isError } = useQuery({
+    queryKey: ['dbConnection', db.id],
+    queryFn: () => checkDatabaseConnection(db),
+    refetchInterval: 30000, // Recheck every 30 seconds
+  });
   return (
-    <Suspense fallback={<div>Loading...</div>}>
       <TableRow>
         <TableCell className="text-left">
-          <Link className="w-full" href={!data?.lc ? `#` : `/db/${db.id}`}>
+          <Link className="w-full" href={`/db/${db.id}`}>
             {db.database}
           </Link>
         </TableCell>
         <TableCell className="text-center">
-          {" "}
-          <Link className="w-full" href={!data?.lc ? `#` : `/db/${db.id}`}>
+          <Link className="w-full" href={`/db/${db.id}`}>
             {db.type}
           </Link>
         </TableCell>
         <TableCell className="text-center">
-          <Status />
+          <div className="w-full flex justify-center">
+            {isLoading ? (
+                <div>Checking...</div>
+            ) : isError ? (
+                <div className="text-red-500">Error</div>
+            ) : (
+                <div
+                    className={`flex flex-row justify-center rounded-full items-center h-[20px] w-[20px] ${
+                        isConnected ? 'bg-green-400' : 'bg-red-400'
+                    }`}
+                ></div>
+            )}
+          </div>
         </TableCell>
         <TableCell className="text-right">
-          <button
-            onClick={() =>
-              fetch("/api/database", {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  id: db.id,
-                }),
-              })
-            }
-          >
+          <button onClick={() => onDelete(db.id)}>
             <Trash />
           </button>
         </TableCell>
       </TableRow>
-    </Suspense>
   );
 }
 
 export default function DBTable() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["database"],
-    queryFn: () => fetch("/api/database").then((res) => res.json()),
+  const queryClient = useQueryClient();
+
+  const { data: databases, isLoading } = useQuery({
+    queryKey: ["databases"],
+    queryFn: localStorageDBManager.getAllDBs,
+    // Ensure the query updates frequently
+    refetchInterval: 1000,
   });
+
+  const handleDelete = (id) => {
+    localStorageDBManager.deleteDB(id);
+    queryClient.invalidateQueries(["databases"]);
+  };
+
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <>
       <Suspense fallback={<div>Loading...</div>}>
         <Table className="max-w-[800px]">
           <TableCaption>A list of all your databases.</TableCaption>
@@ -111,19 +103,18 @@ export default function DBTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length > 0 &&
-              data.map((db) => {
-                return <DbRow key={db.database} db={db} />;
-              })}
+            {databases && databases.length > 0 &&
+                databases.map((db) => (
+                    <DbRow key={db.id} db={db} onDelete={handleDelete} />
+                ))}
           </TableBody>
           <TableFooter>
             <TableRow>
               <TableCell colSpan={3}>Total</TableCell>
-              <TableCell className="text-right">{data.length}</TableCell>
+              <TableCell className="text-right">{databases ? databases.length : 0}</TableCell>
             </TableRow>
           </TableFooter>
         </Table>
       </Suspense>
-    </>
   );
 }
