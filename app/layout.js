@@ -22,9 +22,6 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
       >
         <body
           className={cn(

@@ -1,9 +1,7 @@
-import { AddDbForm } from "@/components/AddDbForm";
+import Home from "@/components/home";
 
-export default function Home() {
+export default function Page() {
   return (
-    <div className="w-full">
-      <h1>Home</h1>
-    </div>
+  <Home />
   );
 }
