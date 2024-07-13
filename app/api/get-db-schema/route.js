@@ -7,16 +7,7 @@ export async function POST(req) {
     const dbConfig = await req.json();
     console.log("dbConfig recibido:", dbConfig);
     console.log("Llamando a getDBSchema");
-    const testDB = {
-      type: "test",
-      host: "157.90.123.33",
-      username: "drumstock",
-      password: "test123",
-      port: 10299,
-      database: "test",
-      type: "postgres",
-    };
-    const schema = await getDBSchema(testDB);
+    const schema = await getDBSchema(dbConfig);
     console.log("Schema obtenido:", schema);
     return NextResponse.json(schema);
   } catch (error) {
