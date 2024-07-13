@@ -40,3 +40,4 @@ bun.lockb
 *.tsbuildinfo
 next-env.d.ts
 data.txt
+package-lock.json
