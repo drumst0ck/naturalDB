@@ -14,7 +14,6 @@ export async function POST(req) {
       database,
       synchronize: false,
     };
-
     try {
       const dataSource = new DataSource(dataSourceOptions);
       await dataSource.initialize();
