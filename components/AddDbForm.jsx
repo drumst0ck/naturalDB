@@ -22,6 +22,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+const testDB = {
+  type: "test",
+  host: "157.90.123.33",
+  username: "drumstock",
+  password: "test123",
+  port: "10299",
+  database: "test",
+  type: "postgres",
+};
 
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
@@ -52,12 +61,25 @@ export function AddDbForm({ activador }) {
   const [fase, setFase] = useState("type");
 
   async function onSubmit(data) {
-     localStorageDBManager.saveToDB(data);
+    localStorageDBManager.saveToDB(data);
     queryClient.invalidateQueries(["databases"]);
     toast({
       title: "Your DB has been added with the following values:",
       description: (
-          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+    });
+    activador(false);
+  }
+  async function onSubmitTest(data) {
+    localStorageDBManager.saveToDB(data);
+    queryClient.invalidateQueries(["databases"]);
+    toast({
+      title: "Your DB has been added with the following values:",
+      description: (
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
         </pre>
       ),
@@ -76,6 +98,7 @@ export function AddDbForm({ activador }) {
   }
   return (
     <Form className="w-full max-w-[300px]" {...form}>
+      <button onClick={() => onSubmitTest(testDB)}>Test</button>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-5">
         {fase === "type" && (
           <>
