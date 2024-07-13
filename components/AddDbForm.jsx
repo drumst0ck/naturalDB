@@ -27,7 +27,7 @@ const testDB = {
   host: "157.90.123.33",
   username: "drumstock",
   password: "test123",
-  port: "10299",
+  port: 10299,
   database: "test",
   type: "postgres",
 };
