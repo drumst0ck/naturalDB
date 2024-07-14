@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
-import { OpenAIStream, StreamingTextResponse } from "ai";
-import { Configuration, OpenAIApi } from "openai-edge";
+import {
+  StreamingTextResponse,
+  streamText,
+} from "ai";
 import getDBSchema from "../../../lib/getDBSchema";
+import { createOpenAI } from "@ai-sdk/openai";
 
-const config = new Configuration({
+const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  compatibility: "strict",
 });
-const openai = new OpenAIApi(config);
 
 export async function POST(req) {
   try {
@@ -44,16 +47,15 @@ export async function POST(req) {
 
                           Remember to apply this limit even when not explicitly requested in the natural language input. The goal is to prevent the execution of queries that could return an excessive number of results and potentially overload the server.`;
 
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      stream: true,
+    const model = openai.chat("gpt-3.5-turbo");
+    const result = await streamText({
+      model: model,
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: prompt },
       ],
     });
-    const stream = OpenAIStream(response);
-    return new StreamingTextResponse(stream);
+    return new StreamingTextResponse(result.toAIStream());
   } catch (error) {
     console.error("Error in SQL generation:", error);
     return NextResponse.json(

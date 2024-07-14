@@ -72,7 +72,6 @@ export function Chat({ db }) {
   };
 
   useEffect(() => {
-    // Función para obtener el esquema de la base de datos
     const fetchDbSchema = async () => {
       try {
         const response = await fetch("/api/get-db-schema", {
@@ -89,10 +88,8 @@ export function Chat({ db }) {
           id: "initial-message",
           role: "assistant",
           content: `Hi! I have analyzed your database schema. Here is a summary:
-
-${formatSchemaForDisplay(schema)}
-
-I am ready to help you with queries related to this database, what would you like to know?`,
+                    ${formatSchemaForDisplay(schema)}
+                    I am ready to help you with queries related to this database, what would you like to know?`,
         };
 
         setMessages([initialAIMessage]);
