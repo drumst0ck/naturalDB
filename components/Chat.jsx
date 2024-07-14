@@ -5,8 +5,11 @@ import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Play } from "lucide-react";
 
+const STORAGE_KEY = "chat_history";
+
 export function Chat({ db }) {
   const [dbSchema, setDbSchema] = useState(null);
+  const [initialMessages, setInitialMessages] = useState([]);
   const {
     messages,
     input,
@@ -16,15 +19,17 @@ export function Chat({ db }) {
     setMessages,
   } = useChat({
     api: "/api/chat",
-    initialMessages: [],
+    initialMessages,
     body: { dbConfig: db },
   });
   const [isExecuting, setIsExecuting] = useState(false);
   const messagesEndRef = useRef(null);
   const formRef = useRef(null);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
   const isSelectQuery = (query) => {
     return /^SELECT/i.test(query.trim());
   };
@@ -61,14 +66,25 @@ export function Chat({ db }) {
   };
 
   const addQueryResultMessage = (result) => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        id: Date.now(),
-        role: "system",
-        content: `Query Result:\n\n${result}`,
-      },
-    ]);
+    const newMessage = {
+      id: Date.now(),
+      role: "system",
+      content: `Query Result:\n\n${result}`,
+    };
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages, newMessage];
+      saveMessages(updatedMessages);
+      return updatedMessages;
+    });
+  };
+
+  const saveMessages = (messagesToSave) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messagesToSave));
+  };
+
+  const loadMessages = () => {
+    const savedMessages = localStorage.getItem(STORAGE_KEY);
+    return savedMessages ? JSON.parse(savedMessages) : [];
   };
 
   useEffect(() => {
@@ -84,32 +100,41 @@ export function Chat({ db }) {
         const schema = await response.text();
         setDbSchema(schema);
 
-        const initialAIMessage = {
-          id: "initial-message",
-          role: "assistant",
-          content: `Hi! I have analyzed your database schema. Here is a summary:
-                    ${formatSchemaForDisplay(schema)}
-                    I am ready to help you with queries related to this database, what would you like to know?`,
-        };
-
-        setMessages([initialAIMessage]);
+        const savedMessages = loadMessages();
+        if (savedMessages.length > 0) {
+          setInitialMessages(savedMessages);
+        } else {
+          const initialAIMessage = {
+            id: "initial-message",
+            role: "assistant",
+            content: `Hi! I have analyzed your database schema. Here is a summary:
+                      ${formatSchemaForDisplay(schema)}
+                      I am ready to help you with queries related to this database, what would you like to know?`,
+          };
+          setInitialMessages([initialAIMessage]);
+          saveMessages([initialAIMessage]);
+        }
       } catch (error) {
         console.error("Error fetching database schema:", error);
-        setMessages([
-          {
-            id: "error-message",
-            role: "assistant",
-            content:
-              "Sorry, there was a problem getting the schema from the database, how can I help you?",
-          },
-        ]);
+        const errorMessage = {
+          id: "error-message",
+          role: "assistant",
+          content:
+            "Sorry, there was a problem getting the schema from the database, how can I help you?",
+        };
+        setInitialMessages([errorMessage]);
       }
     };
 
     fetchDbSchema();
-  }, [db, setMessages]);
+  }, [db]);
 
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+      saveMessages(messages);
+    }
+  }, [messages]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
