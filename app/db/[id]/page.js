@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { Chat } from "@/components/Chat";
 import { localStorageDBManager } from "@/lib/localStorageDBManager";
 
@@ -18,12 +18,12 @@ export default function Page({ params }) {
   }
 
   return (
-      <>
-        <div className="flex flex-row mt-9 justify-center items-center w-full p-2">
-          <div className="flex flex-col w-full max-w-[700px] items-center">
-            <Chat db={db} />
-          </div>
+    <>
+      <div className="flex flex-row mt-9 justify-center items-center w-full p-2">
+        <div className="flex flex-col w-full max-w-[700px] items-center">
+          <Chat id={id} db={db} />
         </div>
-      </>
+      </div>
+    </>
   );
 }

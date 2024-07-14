@@ -5,9 +5,9 @@ import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Play } from "lucide-react";
 
-const STORAGE_KEY = "chat_history";
+const STORAGE_KEY_PREFIX = "chat_history_";
 
-export function Chat({ db }) {
+export function Chat({ db, id }) {
   const [dbSchema, setDbSchema] = useState(null);
   const [initialMessages, setInitialMessages] = useState([]);
   const {
@@ -79,11 +79,14 @@ export function Chat({ db }) {
   };
 
   const saveMessages = (messagesToSave) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messagesToSave));
+    localStorage.setItem(
+      STORAGE_KEY_PREFIX + id,
+      JSON.stringify(messagesToSave)
+    );
   };
 
   const loadMessages = () => {
-    const savedMessages = localStorage.getItem(STORAGE_KEY);
+    const savedMessages = localStorage.getItem(STORAGE_KEY_PREFIX + id);
     return savedMessages ? JSON.parse(savedMessages) : [];
   };
 
@@ -127,14 +130,14 @@ export function Chat({ db }) {
     };
 
     fetchDbSchema();
-  }, [db]);
+  }, [db, id]);
 
   useEffect(() => {
     if (messages.length > 0) {
       scrollToBottom();
       saveMessages(messages);
     }
-  }, [messages]);
+  }, [messages, id]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
