@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Play } from "lucide-react";
-
+import { Loader2, Play, Send } from "lucide-react";
+import { formatSchemaForDisplay } from "@/lib/utils";
 const STORAGE_KEY_PREFIX = "chat_history_";
 
 export function Chat({ db, id }) {
@@ -21,10 +21,26 @@ export function Chat({ db, id }) {
     api: "/api/chat",
     initialMessages,
     body: { dbConfig: db },
+    onResponse: (response) => {
+      // Asignar timestamp a la respuesta del asistente
+      const newMessage = addTimestamp({
+        id: Date.now(),
+        role: "assistant",
+        content: response.content,
+      });
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    },
   });
   const [isExecuting, setIsExecuting] = useState(false);
   const messagesEndRef = useRef(null);
   const formRef = useRef(null);
+  const addTimestamp = useCallback(
+    (message) => ({
+      ...message,
+      timestamp: new Date().toISOString(),
+    }),
+    []
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,6 +86,7 @@ export function Chat({ db, id }) {
       id: Date.now(),
       role: "system",
       content: `Query Result:\n\n${result}`,
+      timestamp: new Date().toISOString(),
     };
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages, newMessage];
@@ -87,7 +104,10 @@ export function Chat({ db, id }) {
 
   const loadMessages = () => {
     const savedMessages = localStorage.getItem(STORAGE_KEY_PREFIX + id);
-    return savedMessages ? JSON.parse(savedMessages) : [];
+    if (savedMessages) {
+      return JSON.parse(savedMessages);
+    }
+    return [];
   };
 
   useEffect(() => {
@@ -107,37 +127,41 @@ export function Chat({ db, id }) {
         if (savedMessages.length > 0) {
           setInitialMessages(savedMessages);
         } else {
-          const initialAIMessage = {
+          const initialAIMessage = addTimestamp({
             id: "initial-message",
             role: "assistant",
             content: `Hi! I have analyzed your database schema. Here is a summary:
                       ${formatSchemaForDisplay(schema)}
                       I am ready to help you with queries related to this database, what would you like to know?`,
-          };
+          });
           setInitialMessages([initialAIMessage]);
           saveMessages([initialAIMessage]);
         }
       } catch (error) {
         console.error("Error fetching database schema:", error);
-        const errorMessage = {
+        const errorMessage = addTimestamp({
           id: "error-message",
           role: "assistant",
           content:
             "Sorry, there was a problem getting the schema from the database, how can I help you?",
-        };
+        });
         setInitialMessages([errorMessage]);
       }
     };
 
     fetchDbSchema();
-  }, [db, id]);
+  }, [db, id, addTimestamp]);
 
   useEffect(() => {
     if (messages.length > 0) {
       scrollToBottom();
-      saveMessages(messages);
+      const messagesWithTimestamps = messages.map((msg) =>
+        msg.timestamp ? msg : addTimestamp(msg)
+      );
+      setMessages(messagesWithTimestamps);
+      saveMessages(messagesWithTimestamps);
     }
-  }, [messages, id]);
+  }, [messages, id, addTimestamp, setMessages]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -146,101 +170,117 @@ export function Chat({ db, id }) {
     }
   };
 
-  const formatSchemaForDisplay = (schema) => {
-    if (!schema) return "Scheme not available";
-    schema = schema.replace(/^"|"$/g, "").replace(/\\n/g, "\n");
-    const match = schema.match(/CREATE TABLE (\w+) \(([\s\S]+)\);/);
-    if (!match) return "Unrecognized scheme format";
+  const onSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      handleSubmit(e);
+    },
+    [handleSubmit]
+  );
 
-    const [, tableName, columnsString] = match;
-    const columns = columnsString
-      .split(",")
-      .map((col) => col.trim())
-      .filter((col) => col)
-      .map((col) => `  ${col}`);
-    return `Tabla: ${tableName}\n\nColumnas:\n${columns.join("\n")}`;
-  };
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-    handleSubmit(e);
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   const renderMessage = (message) => {
-    const isSQL = message.content.includes("SELECT");
+    console.log(message);
+    const isSQL =
+      message.content &&
+      typeof message.content === "string" &&
+      message.content.toUpperCase().includes("SELECT");
+    const isUser = message.role === "user";
     return (
-      <div
-        className={`max-w-sm p-4 rounded-lg ${
-          message.role === "user"
-            ? "bg-blue-500 text-white"
-            : message.role === "system"
-            ? "bg-green-200 text-black"
-            : "bg-gray-200 text-black"
+      <motion.div
+        key={message.id}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className={`max-w-2xl mx-auto my-2 p-4 rounded-3xl ${
+          isUser
+            ? "bg-blue-600 text-white ml-auto"
+            : "bg-gray-700 text-white mr-auto"
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-bold text-sm">{isUser ? "Usuario" : "IA"}</span>
+          <span className="text-xs opacity-70">
+            {formatTimestamp(message.timestamp)}
+          </span>
+        </div>
+        <p className="whitespace-pre-wrap text-sm md:text-base">
+          {message.content}
+        </p>
         {isSQL && (
           <Button
             onClick={() => executeQuery(message.content)}
             disabled={isExecuting}
-            className="mt-2"
+            className="mt-2 bg-gray-800 hover:bg-gray-900 text-white"
           >
             {isExecuting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
-              <Play className="h-4 w-4" />
+              <Play className="h-4 w-4 mr-2" />
             )}
             {isExecuting ? "Executing..." : "Execute Query"}
           </Button>
         )}
-      </div>
+      </motion.div>
     );
   };
 
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-2xl mx-auto">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex flex-col h-[calc(100vh-126px)] w-full bg-gray-900">
+      <div className="flex-1 overflow-y-auto p-4">
         <AnimatePresence>
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {renderMessage(message)}
-            </motion.div>
-          ))}
+          {messages.map((message) => renderMessage(message))}
         </AnimatePresence>
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-200 text-black max-w-sm p-4 rounded-lg flex items-center space-x-2">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="bg-gray-700 text-white max-w-sm p-4 rounded-3xl flex items-center space-x-2"
+            >
               <Loader2 className="h-4 w-4 animate-spin" />
-              <p>{"I'll need a second to take a look at this..."}</p>
-            </div>
+              <p className="text-sm md:text-base">Thinking...</p>
+            </motion.div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <form ref={formRef} onSubmit={onSubmit} className="p-4 border-t">
-        <div className="flex space-x-4">
-          <Textarea
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message here. Press Enter to send, Shift+Enter for new line."
-            className="flex-1"
-            rows={1}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
-          </Button>
-        </div>
-      </form>
+      <div className="border-t border-gray-700 bg-gray-800 p-4">
+        <form ref={formRef} onSubmit={onSubmit} className="max-w-3xl mx-auto">
+          <div className="flex items-end space-x-2">
+            <Textarea
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  onSubmit(e);
+                }
+              }}
+              placeholder="Type your message here..."
+              className="flex-1 min-h-[60px] max-h-[200px] resize-none bg-gray-700 text-white border-gray-600 focus:border-blue-500 placeholder-gray-400"
+              rows={1}
+            />
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="h-[60px] px-4 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
