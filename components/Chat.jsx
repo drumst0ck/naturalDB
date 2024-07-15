@@ -368,7 +368,7 @@ export function Chat({ db, id }) {
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Type your command..."
+              placeholder="Type your message..."
               className="flex-grow bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 outline-none"
             />
           </div>
