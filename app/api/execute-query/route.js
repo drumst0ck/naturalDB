@@ -43,17 +43,14 @@ export async function POST(req) {
         data: selectResult.rows,
       };
     } else if (upperQuery.startsWith("DELETE FROM")) {
-      // Para DELETE, no podemos obtener los datos eliminados, solo devolvemos el recuento
       processedResult = {
         message: `Operation successful. ${result.rowCount} row(s) deleted.`,
         affectedRows: result.rowCount,
       };
     } else {
-      // Para SELECT y otras operaciones
       processedResult = result.rows;
     }
 
-    // Confirmar la transacción
     await client.query("COMMIT");
 
     return NextResponse.json(processedResult);
