@@ -2,12 +2,6 @@
 import Image from "next/image";
 import { Suspense } from "react";
 import { ModeToggle } from "./ModeToggle";
-import Link from "next/link";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 
 import { MenuMobile } from "./MenuMobile";
 export default function Nav() {
@@ -27,11 +21,6 @@ export default function Nav() {
                   height={0}
                   priority
                 />
-              </div>
-              <div className="flex lg:hidden flex-col items-end justify-center">
-                <div className="flex flex-row justify-end gap-2 items-center w-full">
-                  <MenuMobile />
-                </div>
               </div>
             </div>
           </div>
