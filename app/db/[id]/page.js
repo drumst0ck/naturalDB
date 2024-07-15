@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Chat } from "@/components/Chat";
 import { localStorageDBManager } from "@/lib/localStorageDBManager";
-import RealTimeDBViewer from "@/components/RealTimeDBViewer";
 
 export default function Page({ params }) {
   const { id } = params;
