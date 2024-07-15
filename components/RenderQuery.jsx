@@ -9,11 +9,46 @@ import {
 import { renderSQLCode } from "@/lib/utils";
 
 const RenderQuery = (result, viewMode) => {
+  console.log(result);
+
+  const extractJsonArray = (str) => {
+    const match = str.match(/\[[\s\S]*\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (e) {
+        console.error("Error parsing extracted JSON:", e);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const extractArray = (data) => {
+    if (Array.isArray(data)) {
+      return data;
+    }
+    for (const key in data) {
+      if (Array.isArray(data[key])) {
+        return data[key];
+      }
+    }
+    return null;
+  };
+
   if (viewMode === "table") {
     try {
-      const data = JSON.parse(result);
-      if (Array.isArray(data) && data.length > 0) {
-        const columns = Object.keys(data[0]);
+      let data;
+      if (typeof result === "string") {
+        data = extractJsonArray(result);
+      } else {
+        data = result;
+      }
+
+      const arrayData = extractArray(data);
+
+      if (arrayData && arrayData.length > 0) {
+        const columns = Object.keys(arrayData[0]);
         return (
           <UITable className="w-full max-w-[900px] overflow-auto">
             <TableHeader>
@@ -24,10 +59,12 @@ const RenderQuery = (result, viewMode) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((row, index) => (
+              {arrayData.map((row, index) => (
                 <TableRow key={index}>
                   {columns.map((column) => (
-                    <TableCell key={column}>{row[column]}</TableCell>
+                    <TableCell key={column}>
+                      {JSON.stringify(row[column])}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))}
@@ -36,11 +73,10 @@ const RenderQuery = (result, viewMode) => {
         );
       }
     } catch (error) {
-      console.error("Error parsing JSON:", error);
+      console.error("Error parsing or rendering data:", error);
     }
   }
-
-  // Fallback to JSON view
   return renderSQLCode(result);
 };
+
 export default RenderQuery;
