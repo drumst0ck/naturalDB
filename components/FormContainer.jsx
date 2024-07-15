@@ -21,6 +21,7 @@ import {
 import { AddDbForm } from "./AddDbForm";
 import { useState } from "react";
 import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
 export default function FormContainer({ children }) {
   const [open, setOpen] = useState(false);
   if (!isMobile) {
@@ -28,7 +29,9 @@ export default function FormContainer({ children }) {
       <>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">Add new database</Button>
+            <Button variant="outline">
+              <Plus />
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
