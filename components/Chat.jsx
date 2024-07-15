@@ -185,7 +185,6 @@ export function Chat({ db, id }) {
   };
 
   const renderMessage = (message) => {
-    console.log(message);
     const isSQL =
       message.content &&
       typeof message.content === "string" &&
@@ -194,29 +193,28 @@ export function Chat({ db, id }) {
     return (
       <motion.div
         key={message.id}
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className={`max-w-2xl mx-auto my-2 p-4 rounded-3xl ${
-          isUser
-            ? "bg-blue-600 text-white ml-auto"
-            : "bg-gray-700 text-white mr-auto"
-        }`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col space-y-2"
       >
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-sm">{isUser ? "Usuario" : "IA"}</span>
+        <div className="flex items-center space-x-2">
+          <span className="text-[#5ad4e6]">
+            {isUser ? "user@localhost:~$" : "ai@server:~$"}
+          </span>
           <span className="text-xs opacity-70">
             {formatTimestamp(message.timestamp)}
           </span>
         </div>
-        <p className="whitespace-pre-wrap text-sm md:text-base">
+        <pre className="whitespace-pre-wrap text-sm overflow-x-auto bg-[#2a2a2a] p-2 rounded">
           {message.content}
-        </p>
+        </pre>
         {isSQL && (
           <Button
             onClick={() => executeQuery(message.content)}
             disabled={isExecuting}
-            className="mt-2 bg-gray-800 hover:bg-gray-900 text-white"
+            className="self-start mt-2 bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
           >
             {isExecuting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -231,54 +229,57 @@ export function Chat({ db, id }) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-126px)] w-full bg-gray-900">
-      <div className="flex-1 overflow-y-auto p-4">
+    <div className="flex flex-col h-[calc(100vh-126px)] w-full bg-[#1e1e1e] text-white font-mono">
+      <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">
+        <div className="flex space-x-2 mr-4">
+          <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+          <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+        </div>
+        <div className="flex-grow text-center text-sm">bash</div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <AnimatePresence>
           {messages.map((message) => renderMessage(message))}
         </AnimatePresence>
         {isLoading && (
-          <div className="flex justify-start">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="bg-gray-700 text-white max-w-sm p-4 rounded-3xl flex items-center space-x-2"
-            >
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <p className="text-sm md:text-base">Thinking...</p>
-            </motion.div>
+          <div className="flex items-center text-[#5ad4e6]">
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <span>Processing...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="border-t border-gray-700 bg-gray-800 p-4">
-        <form ref={formRef} onSubmit={onSubmit} className="max-w-3xl mx-auto">
-          <div className="flex items-end space-x-2">
+
+      <div className="border-t border-[#323232] bg-[#1e1e1e] p-4">
+        <form
+          ref={formRef}
+          onSubmit={onSubmit}
+          className="flex items-end space-x-2"
+        >
+          <div className="flex-grow flex items-center bg-[#2a2a2a] rounded p-2">
+            <span className="text-[#5ad4e6] mr-2">$</span>
             <Textarea
               value={input}
               onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  onSubmit(e);
-                }
-              }}
-              placeholder="Type your message here..."
-              className="flex-1 min-h-[60px] max-h-[200px] resize-none bg-gray-700 text-white border-gray-600 focus:border-blue-500 placeholder-gray-400"
+              onKeyDown={handleKeyDown}
+              placeholder="Type your command..."
+              className="flex-grow bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 resize-none overflow-hidden"
               rows={1}
             />
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="h-[60px] px-4 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
           </div>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-[#5ad4e6] hover:bg-[#4ac3d5] text-black"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
         </form>
       </div>
     </div>
