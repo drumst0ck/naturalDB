@@ -52,10 +52,6 @@ export function Chat({ db, id }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const isSelectQuery = (query) => {
-    return /^SELECT/i.test(query.trim());
-  };
-
   const executeQuery = async (query) => {
     setIsExecuting(true);
     try {
