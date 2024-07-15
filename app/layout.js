@@ -26,14 +26,14 @@ export default function RootLayout({ children }) {
             fontSans.variable
           )}
         >
-          <Nav />
-          <main className="flex flex-row w-full justify-center items-center p-1 relative">
+          <main className="flex flex-row w-full justify-center items-center p-1 relative h-full">
             <DotPattern
               className={cn(
                 "[mask-image:radial-gradient(1100px_circle_at_center,white,transparent)]"
               )}
             />
             <div className="flex flex-col w-full max-w-[1400px] items-center relative p-4">
+              <Nav />
               <QueryClientProvider client={client}>
                 {children}
               </QueryClientProvider>

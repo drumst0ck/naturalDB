@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="text-white bg-[#121212] min-h-screen">
+    <div className="text-white  min-h-screen">
       <section className="flex flex-col items-center justify-center min-h-[600px] bg-center bg-cover relative overflow-hidden">
         <div className="relative z-10 text-center max-w-3xl px-4">
           <h1 className="text-5xl animated-gradient font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
@@ -63,7 +63,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="py-20 relative bg-[#121212] ">
+      <section className="py-20 relative  ">
         <div className="absolute inset-0 bg-[url('/background-grid.svg')] opacity-20 z-[2]"></div>
         <div className="container relative z-[99] mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12">

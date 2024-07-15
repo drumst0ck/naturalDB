@@ -6,7 +6,7 @@ export default async function Dashboard() {
   return (
     <>
       <Suspense fallback={<div>Loading...</div>}>
-        <div className="flex flex-row justify-center items-center w-full p-2">
+        <div className="flex flex-row justify-center min-h-screen items-start w-full p-2">
           <div className="flex flex-col w-full items-center">
             <FormContainer>
               <AddDbForm />
