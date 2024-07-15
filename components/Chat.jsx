@@ -55,10 +55,6 @@ export function Chat({ db, id }) {
     []
   );
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const executeQuery = async (query) => {
     setIsExecuting(true);
     try {
@@ -174,7 +170,6 @@ export function Chat({ db, id }) {
 
   useEffect(() => {
     if (messages.length > 0) {
-      scrollToBottom();
       const messagesWithTimestamps = messages.map((msg) =>
         msg.timestamp ? msg : addTimestamp(msg)
       );
@@ -197,6 +192,24 @@ export function Chat({ db, id }) {
     },
     [handleSubmit]
   );
+  const scrollToMessage = (messageId) => {
+    const messageElement = document.getElementById(messageId);
+    if (messageElement) {
+      const containerElement = messageElement.closest(".overflow-y-auto");
+      if (containerElement) {
+        const containerRect = containerElement.getBoundingClientRect();
+        const messageRect = messageElement.getBoundingClientRect();
+        const scrollTop =
+          messageElement.offsetTop -
+          containerElement.offsetTop -
+          (containerRect.height - messageRect.height) / 2;
+        containerElement.scrollTo({
+          top: scrollTop,
+          behavior: "smooth",
+        });
+      }
+    }
+  };
 
   const renderMessage = (message) => {
     const isSelected = selectedMessage === message.id;
@@ -216,6 +229,7 @@ export function Chat({ db, id }) {
     return (
       <motion.div
         key={message.id}
+        id={`message-${message.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
@@ -227,7 +241,12 @@ export function Chat({ db, id }) {
                       : "border-2 border-gray-700"
                   }
                   rounded-lg transition-all duration-300 ease-in-out`}
-        onClick={() => setSelectedMessage(isSelected ? null : message.id)}
+        onClick={() => {
+          setSelectedMessage(isSelected ? null : message.id);
+          if (!isSelected) {
+            scrollToMessage(`message-${message.id}`);
+          }
+        }}
       >
         {isSelected && (
           <div className="absolute inset-0 rounded-lg p-[2px] bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 background-animate">
