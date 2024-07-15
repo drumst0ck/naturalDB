@@ -16,10 +16,8 @@ export async function POST(req) {
 
     client = await pool.connect();
 
-    // Iniciar una transacción
     await client.query("BEGIN");
 
-    // Ejecutar la consulta original
     const result = await client.query(query);
 
     let processedResult;
