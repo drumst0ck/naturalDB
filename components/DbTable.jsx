@@ -139,7 +139,7 @@ const DbTable = () => {
   }
 
   return (
-    <div className="bg-gray-900 p-6 rounded-3xl shadow-lg max-w-4xl mx-auto lg:min-w-[900px]">
+    <div className="bg-gray-900 p-6 rounded-3xl shadow-lg  mx-auto w-full lg:max-w-[1200px]">
       <Table>
         <TableHeader>
           <TableRow className="border-b border-gray-700">

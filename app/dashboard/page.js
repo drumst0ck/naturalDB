@@ -7,12 +7,14 @@ export default async function Dashboard() {
     <>
       <Suspense fallback={<div>Loading...</div>}>
         <div className="flex flex-row justify-center min-h-screen items-start w-full p-2">
-          <div className="flex flex-col w-full items-center">
-            <FormContainer>
-              <AddDbForm />
-            </FormContainer>
-            <div className="flex flex-row w-full justify-center">
-              <div className="flex flex-col max-w-[1200px] w-full items-center">
+          <div className="flex flex-col w-full max-w-[900px]">
+            <div className="flex flex-row w-full justify-start mt-4">
+              <FormContainer>
+                <AddDbForm />
+              </FormContainer>
+            </div>
+            <div className="flex flex-row w-full justify-center mt-4">
+              <div className="flex flex-col max-w-[900px] w-full items-center">
                 <DBTable />
               </div>
             </div>
