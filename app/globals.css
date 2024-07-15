@@ -25,3 +25,19 @@
 body {
   background-color: black;
 }
+@keyframes gradientBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.background-animate {
+  background-size: 400%;
+  animation: gradientBorder 3s ease infinite;
+}

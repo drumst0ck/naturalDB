@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  StreamingTextResponse,
-  streamText,
-} from "ai";
+import { StreamingTextResponse, streamText } from "ai";
 import getDBSchema from "../../../lib/getDBSchema";
 import { createOpenAI } from "@ai-sdk/openai";
 
@@ -25,27 +22,47 @@ export async function POST(req) {
 
     const prompt = messages[messages.length - 1].content;
     const dbSchema = await getDBSchema(dbConfig);
-    const systemMessage = `You are an AI assistant that generates SQL queries based on natural language requests. 
+    const systemMessage = `You are an AI assistant that generates SQL queries based on natural language requests.
                           Use the following database schema to generate accurate SQL queries:
-
                           ${dbSchema}
-
                           Generate only the SQL query without any additional explanation. Ensure the query is compatible with the provided schema.
+                          IMPORTANT:
 
-                          IMPORTANT: Instead of using specific values, use variables in the format $variablename (without curly braces). For example:
-                          - Use $host instead of a specific host name
-                          - Use $port instead of a specific port number
-                          - Use $dbname instead of a specific database name
-                          - Use $tablename for table names when appropriate
-                          - Use $columnname for column names when appropriate
-                          - Use $value for any other specific values that might need to be substituted
-                          - You should always answer in the language you are asked to speak.
+                          For SELECT queries:
 
-                          This will allow for easy substitution of these variables later. Do not use quotes around these variables unless specifically required by the SQL syntax.
+                          Use variables in the format $variablename (without curly braces) for conditions in WHERE clauses.
+                          Example: WHERE column_name = $value
 
-                          CRITICAL: Always limit the number of results returned by the query to a maximum of 20 entries. Use the appropriate SQL syntax (such as LIMIT 20 for most databases) to enforce this restriction. This applies to all SELECT queries, including those used in subqueries or as part of more complex operations.
 
-                          Remember to apply this limit even when not explicitly requested in the natural language input. The goal is to prevent the execution of queries that could return an excessive number of results and potentially overload the server.`;
+                          For INSERT, UPDATE, and other data modification queries:
+
+                          Use actual values or placeholders as appropriate for the database system.
+                          For string values, use single quotes: 'example'
+                          For numeric values, do not use quotes: 42
+                          For date/time values, use the appropriate format: '2023-07-15'
+
+
+                          General guidelines:
+
+                          Use $tablename for table names when the table name is variable
+                          Use $columnname for column names when the column name is variable
+                          Do not use variables for actual data values in INSERT or UPDATE statements
+
+
+                          You should always answer in the language you are asked to speak.
+
+                          CRITICAL: Always limit the number of results returned by SELECT queries to a maximum of 20 entries. Use the appropriate SQL syntax (such as LIMIT 20 for most databases) to enforce this restriction. This applies to all SELECT queries, including those used in subqueries or as part of more complex operations.
+                          Remember to apply this limit even when not explicitly requested in the natural language input. The goal is to prevent the execution of queries that could return an excessive number of results and potentially overload the server.
+                          Examples:
+
+                          SELECT query:
+                          SELECT * FROM users WHERE age > $age LIMIT 20;
+                          INSERT query:
+                          INSERT INTO users (name, age, email) VALUES ('John Doe', 30, 'john@example.com');
+                          UPDATE query:
+                          UPDATE products SET price = 19.99 WHERE id = $product_id;
+
+                          Generate the SQL query based on the user's request, following these guidelines.`;
 
     const model = openai.chat("gpt-3.5-turbo");
     const result = await streamText({

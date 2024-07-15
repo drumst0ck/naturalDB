@@ -3,12 +3,6 @@ import { Pool } from "pg";
 export async function POST(req) {
   try {
     const { query, dbConfig } = await req.json();
-    if (!/^SELECT/i.test(query.trim())) {
-      return NextResponse.json(
-        { error: "Solo se permiten consultas SELECT" },
-        { status: 400 }
-      );
-    }
     const pool = new Pool({
       user: dbConfig.username,
       host: dbConfig.host,
