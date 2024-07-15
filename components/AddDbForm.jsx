@@ -56,7 +56,7 @@ export function AddDbForm({ activador }) {
   const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(FormSchema),
-    mode: "onTouched", // This will trigger validation on blur
+    mode: "onTouched",
   });
   const [fase, setFase] = useState("type");
   const { toast } = useToast();
