@@ -8,6 +8,7 @@ import Nav from "@/components/Nav";
 import { useState } from "react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import DotPattern from "@/components/magicui/dot-pattern";
+
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -32,7 +33,7 @@ export default function RootLayout({ children }) {
                 "[mask-image:radial-gradient(1100px_circle_at_center,white,transparent)]"
               )}
             />
-            <div className="flex flex-col w-full max-w-[1400px] items-center relative p-4">
+            <div className="flex flex-col w-full max-w-[1900px] items-center relative p-4">
               <Nav />
               <QueryClientProvider client={client}>
                 {children}

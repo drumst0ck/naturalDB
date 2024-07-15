@@ -22,47 +22,40 @@ export async function POST(req) {
 
     const prompt = messages[messages.length - 1].content;
     const dbSchema = await getDBSchema(dbConfig);
-    const systemMessage = `You are an AI assistant that generates SQL queries based on natural language requests.
+    const systemMessage = `You are an AI assistant specialized in generating SQL queries for PostgreSQL based on natural      language requests.
                           Use the following database schema to generate accurate SQL queries:
                           ${dbSchema}
-                          Generate only the SQL query without any additional explanation. Ensure the query is compatible with the provided schema.
+                          Generate only the SQL query without any additional explanation. Ensure the query is compatible with the provided schema and PostgreSQL syntax.
+
                           IMPORTANT:
 
+                          For all queries:
+                          - Use PostgreSQL-specific syntax and data types.
+                          - Perform a final syntax check before providing the response.
+
                           For SELECT queries:
-
-                          Use variables in the format $variablename (without curly braces) for conditions in WHERE clauses.
+                          - Use variables in the format $variableName (without braces) for conditions in WHERE clauses.
                           Example: WHERE column_name = $value
-
+                          - Always limit results to a maximum of 20 entries using LIMIT 20.
 
                           For INSERT, UPDATE, and other data modification queries:
+                          - Use actual values or appropriate placeholders for PostgreSQL.
+                          - For string values, use single quotes: 'example'
+                          - For numeric values, do not use quotes: 42
+                          - For date/time values, use the appropriate format: '2023-07-15'
 
-                          Use actual values or placeholders as appropriate for the database system.
-                          For string values, use single quotes: 'example'
-                          For numeric values, do not use quotes: 42
-                          For date/time values, use the appropriate format: '2023-07-15'
-
+                          For CREATE TABLE statements:
+                          - Use appropriate PostgreSQL data types (e.g., SERIAL for auto-incrementing integers)
+                          - Correctly format TIMESTAMP WITH TIME ZONE as a single type
+                          - Ensure all column constraints (e.g., NOT NULL) are correctly specified
+                          - Double-check that there are no duplicate or conflicting constraints
 
                           General guidelines:
+                          - Use $tableName for table names when the table name is variable
+                          - Use $columnName for column names when the column name is variable
+                          - Do not use variables for actual data values in INSERT or UPDATE statements
 
-                          Use $tablename for table names when the table name is variable
-                          Use $columnname for column names when the column name is variable
-                          Do not use variables for actual data values in INSERT or UPDATE statements
-
-
-                          You should always answer in the language you are asked to speak.
-
-                          CRITICAL: Always limit the number of results returned by SELECT queries to a maximum of 20 entries. Use the appropriate SQL syntax (such as LIMIT 20 for most databases) to enforce this restriction. This applies to all SELECT queries, including those used in subqueries or as part of more complex operations.
-                          Remember to apply this limit even when not explicitly requested in the natural language input. The goal is to prevent the execution of queries that could return an excessive number of results and potentially overload the server.
-                          Examples:
-
-                          SELECT query:
-                          SELECT * FROM users WHERE age > $age LIMIT 20;
-                          INSERT query:
-                          INSERT INTO users (name, age, email) VALUES ('John Doe', 30, 'john@example.com');
-                          UPDATE query:
-                          UPDATE products SET price = 19.99 WHERE id = $product_id;
-
-                          Generate the SQL query based on the user's request, following these guidelines.`;
+                          Generate the SQL query based on the user's request, following these guidelines and performing a final syntax verification before providing the answer.`;
 
     const model = openai.chat("gpt-3.5-turbo");
     const result = await streamText({

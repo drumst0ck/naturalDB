@@ -2,14 +2,17 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Play, Code, Table } from "lucide-react";
+import { Loader2, Play, Code, Table, Database } from "lucide-react";
 import { formatSchemaForDisplay } from "@/lib/utils";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
 import { isSafeSQL } from "@/lib/utils";
 const STORAGE_KEY_PREFIX = "chat_history_";
+import { DBViewerPopup } from "./DBViewerPopup";
+import Link from "next/link";
 
 export function Chat({ db, id }) {
+  const [isDBViewerOpen, setIsDBViewerOpen] = useState(false);
   const [viewMode, setViewMode] = useState("table");
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [dbSchema, setDbSchema] = useState(null);
@@ -285,11 +288,21 @@ export function Chat({ db, id }) {
     <div className="flex flex-col h-[calc(100vh-126px)] w-full bg-[#1e1e1e] text-white font-mono">
       <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">
         <div className="flex space-x-2 mr-4">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+          <div className="w-3 h-3 rounded-full bg-[#ff5f56]">
+            <Link className="h-3 w-3" href="/dashboard"></Link>
+          </div>
           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
           <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
         </div>
         <div className="flex-grow text-center text-sm">bash</div>
+        <Button
+          onClick={() => setIsDBViewerOpen(true)}
+          variant="ghost"
+          size="sm"
+          className="p-1"
+        >
+          <Database className="h-4 w-4 text-[#E0E0E0]" />
+        </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -320,6 +333,11 @@ export function Chat({ db, id }) {
           </div>
         </form>
       </div>
+      <DBViewerPopup
+        isOpen={isDBViewerOpen}
+        onClose={() => setIsDBViewerOpen(false)}
+        dbConfig={db}
+      />
     </div>
   );
 }

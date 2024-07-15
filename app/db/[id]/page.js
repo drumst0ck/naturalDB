@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Chat } from "@/components/Chat";
 import { localStorageDBManager } from "@/lib/localStorageDBManager";
+import RealTimeDBViewer from "@/components/RealTimeDBViewer";
 
 export default function Page({ params }) {
   const { id } = params;
@@ -19,10 +20,8 @@ export default function Page({ params }) {
 
   return (
     <>
-      <div className="flex flex-row  justify-center items-center w-full p-2">
-        <div className="flex flex-col w-full max-w-[1200px] items-center">
-          <Chat id={id} db={db} />
-        </div>
+      <div className="flex  w-full">
+        <Chat db={db} id={id} />
       </div>
     </>
   );
