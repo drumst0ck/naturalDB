@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
                 "[mask-image:radial-gradient(1100px_circle_at_center,white,transparent)]"
               )}
             />
-            <div className="flex flex-col w-full max-w-[1400px] items-center p-4">
+            <div className="flex flex-col w-full max-w-[1400px] items-center relative p-4">
               <QueryClientProvider client={client}>
                 {children}
               </QueryClientProvider>
