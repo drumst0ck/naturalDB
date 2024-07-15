@@ -1,9 +1,6 @@
 "use client";
 import Image from "next/image";
 import { Suspense } from "react";
-import { ModeToggle } from "./ModeToggle";
-
-import { MenuMobile } from "./MenuMobile";
 export default function Nav() {
   return (
     <>
