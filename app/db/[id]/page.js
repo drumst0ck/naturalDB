@@ -20,7 +20,7 @@ export default function Page({ params }) {
   return (
     <>
       <div className="flex flex-row  justify-center items-center w-full p-2">
-        <div className="flex flex-col w-full max-w-[700px] items-center">
+        <div className="flex flex-col w-full max-w-[1200px] items-center">
           <Chat id={id} db={db} />
         </div>
       </div>
