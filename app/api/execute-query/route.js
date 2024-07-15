@@ -29,7 +29,6 @@ export async function POST(req) {
       upperQuery.startsWith("INSERT INTO") ||
       upperQuery.startsWith("UPDATE")
     ) {
-      // Para INSERT y UPDATE, obtener los datos insertados/actualizados
       const tableName = getTableName(query);
       const whereClause = upperQuery.startsWith("UPDATE")
         ? getWhereClause(query)
