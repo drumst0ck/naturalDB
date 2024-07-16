@@ -260,7 +260,6 @@ export function Chat({ db, id }) {
       ? extractJsonFromString(message.content)
       : null;
     const canRenderAsTable = extractedJson !== null;
-
     return (
       <motion.div
         key={message.id}
