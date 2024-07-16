@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { APIKeyPopup } from "./APIKeyPopup";
 import { Button } from "@/components/ui/button";
 import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +23,37 @@ export function Chat({ db, id }) {
   const [dbSchema, setDbSchema] = useState(null);
   const [initialMessages, setInitialMessages] = useState([]);
   const [copiedStates, setCopiedStates] = useState({});
+  const [openaiApiKey, setOpenaiApiKey] = useState("");
+  const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
 
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem("openai_api_key");
+    if (storedApiKey) {
+      setOpenaiApiKey(storedApiKey);
+    } else {
+      setShowApiKeyPopup(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem("openai_api_key");
+    if (storedApiKey) {
+      setOpenaiApiKey(storedApiKey);
+    }
+  }, []);
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "openai_api_key") {
+        setOpenaiApiKey(e.newValue);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
   const {
     messages,
     input,
@@ -33,9 +64,8 @@ export function Chat({ db, id }) {
   } = useChat({
     api: "/api/chat",
     initialMessages,
-    body: { dbConfig: db },
+    body: { dbConfig: db, openaiApiKey },
     onResponse: (response) => {
-      // Asignar timestamp a la respuesta del asistente
       const newMessage = addTimestamp({
         id: Date.now(),
         role: "assistant",
@@ -44,6 +74,7 @@ export function Chat({ db, id }) {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     },
   });
+
   const [isExecuting, setIsExecuting] = useState(false);
   const messagesEndRef = useRef(null);
   const formRef = useRef(null);
@@ -328,7 +359,29 @@ export function Chat({ db, id }) {
       </motion.div>
     );
   };
+  if (showApiKeyPopup) {
+    return (
+      <APIKeyPopup
+        onClose={() => {
+          setShowApiKeyPopup(false);
+          const newApiKey = localStorage.getItem("openai_api_key");
+          if (newApiKey) {
+            setOpenaiApiKey(newApiKey);
+          }
+        }}
+      />
+    );
+  }
 
+  if (!openaiApiKey) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-red-500">
+          OpenAI API key not found. Please set your API key in the settings.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col h-[calc(100vh-126px)] w-full bg-[#1e1e1e] text-white font-mono">
       <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">

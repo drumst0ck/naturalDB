@@ -3,26 +3,29 @@ import { StreamingTextResponse, streamText } from "ai";
 import getDBSchema from "../../../lib/getDBSchema";
 import { createOpenAI } from "@ai-sdk/openai";
 
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  compatibility: "strict",
-});
-
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { messages, dbConfig } = body;
-    if (!dbConfig || !messages || messages.length === 0) {
-      console.error("Missing dbConfig or messages");
+    const { messages, dbConfig, openaiApiKey } = body;
+
+    if (!dbConfig || !messages || messages.length === 0 || !openaiApiKey) {
+      console.error("Missing dbConfig, messages, or OpenAI API key");
       return NextResponse.json(
-        { error: "Missing database configuration or messages." },
+        {
+          error: "Missing database configuration, messages, or OpenAI API key.",
+        },
         { status: 400 }
       );
     }
 
+    const openai = createOpenAI({
+      apiKey: openaiApiKey,
+      compatibility: "strict",
+    });
+
     const prompt = messages[messages.length - 1].content;
     const dbSchema = await getDBSchema(dbConfig);
-    const systemMessage = `You are an AI assistant specialized in generating SQL queries for PostgreSQL based on natural      language requests.
+    const systemMessage = `You are an AI assistant specialized in generating SQL queries for PostgreSQL based on natural language requests.
                           Use the following database schema to generate accurate SQL queries:
                           ${dbSchema}
                           Generate only the SQL query without any additional explanation. Ensure the query is compatible with the provided schema and PostgreSQL syntax.
