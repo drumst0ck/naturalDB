@@ -13,6 +13,7 @@ import {
   clearConsole,
   loadMessages,
   saveMessages,
+  extractJsonFromString,
 } from "../lib/chatUtils";
 
 export function Chat({ db, id }) {
