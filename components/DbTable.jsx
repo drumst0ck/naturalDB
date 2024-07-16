@@ -1,13 +1,6 @@
 "use client";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2, Database, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -67,14 +60,14 @@ const DbRow = ({ db, onDelete }) => {
   );
 
   return (
-    <motion.tr
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="bg-gray-800 hover:bg-gray-700 transition-colors duration-200"
+      className="flex items-center justify-between py-2 border-b border-gray-700"
     >
-      <TableCell className="text-left py-4">
+      <div className="flex items-center space-x-4">
         {isConnected ? (
           <Link
             href={`/db/${db.id}`}
@@ -87,22 +80,16 @@ const DbRow = ({ db, onDelete }) => {
             <DatabaseName />
           </span>
         )}
-      </TableCell>
-      <TableCell className="text-center py-4 hidden md:table-cell">
         <span className="px-2 py-1 bg-gray-700 rounded-full text-sm">
           {db.type}
         </span>
-      </TableCell>
-      <TableCell className="text-center py-4">
-        <div className="flex justify-center">
-          <StatusIndicator
-            isConnected={isConnected}
-            isLoading={isLoading}
-            isError={isError}
-          />
-        </div>
-      </TableCell>
-      <TableCell className="text-right py-4">
+      </div>
+      <div className="flex items-center space-x-4">
+        <StatusIndicator
+          isConnected={isConnected}
+          isLoading={isLoading}
+          isError={isError}
+        />
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -111,8 +98,8 @@ const DbRow = ({ db, onDelete }) => {
         >
           <Trash2 className="h-5 w-5" />
         </motion.button>
-      </TableCell>
-    </motion.tr>
+      </div>
+    </motion.div>
   );
 };
 
@@ -130,52 +117,35 @@ const DbTable = () => {
     queryClient.invalidateQueries(["databases"]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-gray-900 p-6 rounded-3xl shadow-lg  mx-auto w-full lg:max-w-[1200px]">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b border-gray-700">
-            <TableHead className="text-left text-gray-400 py-4">
-              Database
-            </TableHead>
-            <TableHead className="text-center text-gray-400 py-4 hidden md:table-cell">
-              Type
-            </TableHead>
-            <TableHead className="text-center text-gray-400 py-4">
-              Status
-            </TableHead>
-            <TableHead className="text-right text-gray-400 py-4">
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="bg-[#1e1e1e] text-white font-mono  flex w-full flex-col rounded-lg overflow-hidden">
+      <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">
+        <div className="flex space-x-2 mr-4">
+          <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+          <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+        </div>
+        <div className="flex-grow text-center text-sm">Database List</div>
+      </div>
+      <div className="flex-1 overflow-y-auto p-4">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+          </div>
+        ) : (
           <AnimatePresence>
             {databases && databases.length > 0 ? (
               databases.map((db) => (
                 <DbRow key={db.id} db={db} onDelete={handleDelete} />
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center text-gray-500 py-8"
-                >
-                  No databases found
-                </TableCell>
-              </TableRow>
+              <div className="text-center text-gray-500 py-8">
+                No databases found
+              </div>
             )}
           </AnimatePresence>
-        </TableBody>
-      </Table>
+        )}
+      </div>
     </div>
   );
 };
