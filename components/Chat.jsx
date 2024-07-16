@@ -395,7 +395,7 @@ export function Chat({ db, id }) {
             className="absolute inset-0 rounded-lg"
             style={{
               background:
-                "linear-gradient(45deg, #ff00ff, #00ff00, #0000ff, #ff0000, #ffff00)",
+                "linear-gradient(45deg, #ff00ff,#22d3ee, #9333ea, #ec4899)",
               backgroundSize: "400% 400%",
               animation: "gradientAnimation 15s ease infinite",
             }}
