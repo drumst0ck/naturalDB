@@ -1,15 +1,46 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export function APIKeyPopup({ onClose }) {
   const [step, setStep] = useState(1);
   const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const validateApiKey = async (key) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/validate-api-key", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ apiKey: key }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid API key");
+      }
+
+      return true;
+    } catch (err) {
+      setError("Invalid API key. Please try again.");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("openai_api_key", apiKey);
-    onClose();
+    const isValid = await validateApiKey(apiKey);
+    if (isValid) {
+      localStorage.setItem("openai_api_key", apiKey);
+      onClose();
+    }
   };
 
   return (
@@ -73,11 +104,16 @@ export function APIKeyPopup({ onClose }) {
                 placeholder="Enter your OpenAI API key"
                 className="w-full p-2 mb-4 bg-[#2a2a2a] text-white border border-gray-700 rounded"
               />
+              {error && <p className="text-red-500 mb-4">{error}</p>}
               <Button
                 type="submit"
                 className="w-full bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
+                disabled={isLoading}
               >
-                Save API Key
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                {isLoading ? "Validating..." : "Save API Key"}
               </Button>
             </form>
           )}
