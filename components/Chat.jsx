@@ -397,7 +397,7 @@ export function Chat({ db, id }) {
               background:
                 "linear-gradient(45deg, #ff00ff,#22d3ee, #9333ea, #ec4899)",
               backgroundSize: "400% 400%",
-              animation: "gradientAnimation 15s ease infinite",
+              animation: "gradientAnimation 2s ease infinite",
             }}
           />
           <div className="absolute inset-[3px] rounded-lg bg-[#1e1e1e]" />
