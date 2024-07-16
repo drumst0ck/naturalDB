@@ -3,7 +3,7 @@ import { APIKeyPopup } from "./APIKeyPopup";
 import { Button } from "@/components/ui/button";
 import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Play, Code, Table, Database } from "lucide-react";
+import { Loader2, Play, Code, Table, Database, Trash2 } from "lucide-react";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
 import {
@@ -127,7 +127,16 @@ export function Chat({ db, id }) {
       setIsExecuting(false);
     }
   };
-
+  const clearConsole = () => {
+    if (messages.length > 0) {
+      const initialMessage = messages[0];
+      setMessages([initialMessage]);
+      localStorage.setItem(
+        STORAGE_KEY_PREFIX + id,
+        JSON.stringify([initialMessage])
+      );
+    }
+  };
   const addQueryResultMessage = (result) => {
     const newMessage = {
       id: Date.now(),
@@ -413,14 +422,26 @@ export function Chat({ db, id }) {
               <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
             </div>
             <div className="flex-grow text-center text-sm">bash</div>
-            <Button
-              onClick={() => setIsDBViewerOpen(true)}
-              variant="ghost"
-              size="sm"
-              className="p-1"
-            >
-              <Database className="h-4 w-4 text-[#E0E0E0]" />
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                onClick={clearConsole}
+                variant="ghost"
+                size="sm"
+                className="p-1"
+                title="Clear console"
+              >
+                <Trash2 className="h-4 w-4 text-[#E0E0E0]" />
+              </Button>
+              <Button
+                onClick={() => setIsDBViewerOpen(true)}
+                variant="ghost"
+                size="sm"
+                className="p-1"
+                title="Open DB Viewer"
+              >
+                <Database className="h-4 w-4 text-[#E0E0E0]" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
