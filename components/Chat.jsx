@@ -125,7 +125,9 @@ export function Chat({ db, id }) {
     }
     return [];
   };
-
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
   useEffect(() => {
     const fetchDbSchema = async () => {
       try {
@@ -175,6 +177,7 @@ export function Chat({ db, id }) {
       );
       setMessages(messagesWithTimestamps);
       saveMessages(messagesWithTimestamps);
+      scrollToBottom();
     }
   }, [messages, id, addTimestamp, setMessages]);
 
@@ -188,9 +191,10 @@ export function Chat({ db, id }) {
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault();
+      scrollToBottom();
       handleSubmit(e);
     },
-    [handleSubmit]
+    [handleSubmit, scrollToBottom]
   );
   const scrollToMessage = (messageId) => {
     const messageElement = document.getElementById(messageId);
