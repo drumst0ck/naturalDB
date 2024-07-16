@@ -19,7 +19,7 @@ export default function Page({ params }) {
 
   return (
     <>
-      <div className="flex  w-full">
+      <div className="flex  w-full min-h-[90vh]">
         <Chat db={db} id={id} />
       </div>
     </>

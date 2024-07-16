@@ -5,8 +5,14 @@ import DBTable from "@/components/DbTable";
 export default async function Dashboard() {
   return (
     <>
-      <Suspense fallback={<div>Loading...</div>}>
-        <div className="flex flex-row justify-center min-h-screen items-start w-full p-2">
+      <Suspense
+        fallback={
+          <div className="flex flex-row justify-center min-h-[90vh] items-start w-full p-2">
+            Loading...
+          </div>
+        }
+      >
+        <div className="flex flex-row justify-center min-h-[90vh] items-start w-full p-2">
           <div className="flex flex-col w-full max-w-[900px]">
             <div className="flex flex-row w-full justify-start mt-4">
               <FormContainer>

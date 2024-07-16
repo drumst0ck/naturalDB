@@ -20,13 +20,14 @@ export default function RootLayout({ children }) {
   );
   return (
     <html lang="en" suppressHydrationWarning>
-      <ThemeProvider attribute="class">
-        <body
-          className={cn(
-            "min-h-screen bg-background font-sans antialiased  scroll-smooth",
-            fontSans.variable
-          )}
-        >
+      <body
+        className={cn(
+          "min-h-[90vh] bg-background font-sans antialiased  scroll-smooth",
+          fontSans.variable
+        )}
+      >
+        {" "}
+        <ThemeProvider attribute="class">
           <main className="flex flex-row w-full justify-center items-center p-1 relative h-full">
             <DotPattern
               className={cn(
@@ -41,8 +42,8 @@ export default function RootLayout({ children }) {
             </div>
           </main>
           <Toaster />
-        </body>
-      </ThemeProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

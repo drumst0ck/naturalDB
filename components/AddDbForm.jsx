@@ -105,7 +105,10 @@ export function AddDbForm({ activador }) {
   return (
     <Form {...form}>
       <button onClick={() => onSubmit(testDB)}>add test</button>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6 p-[20px]"
+      >
         <motion.div
           key={fase}
           initial="initial"
