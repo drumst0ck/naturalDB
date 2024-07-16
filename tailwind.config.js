@@ -19,6 +19,14 @@ module.exports = {
     },
     extend: {
       keyframes: {
+        "gradient-x": {
+          "0%, 100%": {
+            "background-position": "0% 50%",
+          },
+          "50%": {
+            "background-position": "100% 50%",
+          },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -36,6 +44,7 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
+        "gradient-x": "gradient-x 15s ease infinite",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],

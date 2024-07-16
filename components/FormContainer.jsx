@@ -38,7 +38,7 @@ export default function FormContainer({ children }) {
               <DialogTitle>Add new database</DialogTitle>
               <DialogDescription>Add your DB</DialogDescription>
             </DialogHeader>
-            <AddDbForm activador={setOpen} />
+            <AddDbForm onClose={setOpen} />
           </DialogContent>
         </Dialog>
       </>

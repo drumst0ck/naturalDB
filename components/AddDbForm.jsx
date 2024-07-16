@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -31,6 +31,7 @@ import {
   Key,
   ArrowRight,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 
 const FormSchema = z.object({
@@ -52,16 +53,18 @@ const FormSchema = z.object({
   database: z.string({ required_error: "Please add your DB name" }),
 });
 
-export function AddDbForm({ activador }) {
+export function AddDbForm({ onClose }) {
   const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     mode: "onTouched",
   });
-  const [fase, setFase] = useState("type");
+  const [fase, setFase] = useState("privacy");
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   async function onSubmit(data) {
+    setIsLoading(true);
     localStorageDBManager.saveToDB(data);
     queryClient.invalidateQueries(["databases"]);
     toast({
@@ -74,24 +77,21 @@ export function AddDbForm({ activador }) {
         </pre>
       ),
     });
-    activador(false);
+    onClose();
+    setIsLoading(false);
   }
-  const testDB = {
-    type: "test",
-    host: "157.90.123.33",
-    username: "drumstock",
-    password: "test123",
-    port: 10299,
-    database: "test",
-    type: "postgres",
-  };
+
   function next(actual, siguiente) {
-    const values = form.getValues();
-    if (!values[actual] || form.getFieldState(actual).error) {
-      form.setError(actual, { message: "This field is required" });
-    } else {
-      form.clearErrors(actual);
+    if (actual === "privacy") {
       setFase(siguiente);
+    } else {
+      const values = form.getValues();
+      if (!values[actual] || form.getFieldState(actual).error) {
+        form.setError(actual, { message: "This field is required" });
+      } else {
+        form.clearErrors(actual);
+        setFase(siguiente);
+      }
     }
   }
 
@@ -103,205 +103,235 @@ export function AddDbForm({ activador }) {
   };
 
   return (
-    <Form {...form}>
-      <button onClick={() => onSubmit(testDB)}>add test</button>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 p-[20px]"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-[20px]"
       >
         <motion.div
-          key={fase}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          variants={fadeInOut}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-[#1e1e1e] rounded-lg p-6 w-full max-w-md text-white font-mono"
         >
-          {fase === "type" && (
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <Database className="mr-2" /> Database Type
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+          <div className="bg-[#323232] p-2 rounded-t-lg flex items-center mb-4">
+            <div className="flex space-x-2">
+              <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+              <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+              <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+            </div>
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <motion.div
+                key={fase}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={fadeInOut}
+              >
+                {fase === "privacy" && (
+                  <>
+                    <h2 className="text-xl mb-4">Privacy Notice</h2>
+                    <p className="mb-4">
+                      This app is focused on privacy and open-source code. We do
+                      not collect any data, and all database information is
+                      stored in your local browser storage. The app will never
+                      have access to your information or database credentials on
+                      our servers.
+                    </p>
+                  </>
+                )}
+                {fase === "type" && (
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Database className="mr-2" /> Database Type
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="bg-[#2a2a2a] border-gray-700 text-white">
+                              <SelectValue placeholder="Select your current DB type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-[#2a2a2a] border-gray-700">
+                            <SelectItem value="postgres">Postgres</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {fase === "host" && (
+                  <FormField
+                    control={form.control}
+                    name="host"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Server className="mr-2" /> Host
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="127.0.0.1"
+                            {...field}
+                            className="bg-[#2a2a2a] border-gray-700 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {fase === "port" && (
+                  <FormField
+                    control={form.control}
+                    name="port"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Key className="mr-2" /> Port
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="1234"
+                            {...field}
+                            className="bg-[#2a2a2a] border-gray-700 text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {fase === "final" && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="database"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center">
+                            <Database className="mr-2" /> DB Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="postgres"
+                              {...field}
+                              className="bg-[#2a2a2a] border-gray-700 text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center">
+                            <User className="mr-2" /> Username
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="root"
+                              {...field}
+                              className="bg-[#2a2a2a] border-gray-700 text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center">
+                            <Key className="mr-2" /> Password
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              {...field}
+                              className="bg-[#2a2a2a] border-gray-700 text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+              </motion.div>
+              <div className="flex flex-row w-full justify-between">
+                {fase !== "privacy" && (
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      setFase(
+                        fase === "type"
+                          ? "privacy"
+                          : fase === "host"
+                          ? "type"
+                          : fase === "port"
+                          ? "host"
+                          : "port"
+                      )
+                    }
+                    className="bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
                   >
-                    <FormControl>
-                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                        <SelectValue placeholder="Select your current DB type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-gray-800 border-gray-700">
-                      <SelectItem value="postgres">Postgres</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-          {fase === "host" && (
-            <FormField
-              control={form.control}
-              name="host"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <Server className="mr-2" /> Host
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="127.0.0.1"
-                      {...field}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-          {fase === "port" && (
-            <FormField
-              control={form.control}
-              name="port"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <Key className="mr-2" /> Port
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="1234"
-                      {...field}
-                      className="bg-gray-800 border-gray-700 text-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-          {fase === "final" && (
-            <>
-              <FormField
-                control={form.control}
-                name="database"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Database className="mr-2" /> DB Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="postgres"
-                        {...field}
-                        className="bg-gray-800 border-gray-700 text-white"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                  </Button>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <User className="mr-2" /> Username
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="root"
-                        {...field}
-                        className="bg-gray-800 border-gray-700 text-white"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                {fase !== "final" ? (
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      next(
+                        fase,
+                        fase === "privacy"
+                          ? "type"
+                          : fase === "type"
+                          ? "host"
+                          : fase === "host"
+                          ? "port"
+                          : "final"
+                      )
+                    }
+                    className="bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
+                  >
+                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    className="bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    {isLoading ? "Saving..." : "Save Database"}
+                  </Button>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Key className="mr-2" /> Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        {...field}
-                        className="bg-gray-800 border-gray-700 text-white"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
+              </div>
+            </form>
+          </Form>
         </motion.div>
-        <div className="flex flex-row w-full p-2 justify-between">
-          {fase !== "type" && (
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="button"
-                onClick={() =>
-                  setFase(
-                    fase === "host" ? "type" : fase === "port" ? "host" : "port"
-                  )
-                }
-                className="bg-gray-700 hover:bg-gray-600 text-white"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-            </motion.div>
-          )}
-          {fase !== "final" ? (
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="button"
-                onClick={() =>
-                  next(
-                    fase,
-                    fase === "type"
-                      ? "host"
-                      : fase === "host"
-                      ? "port"
-                      : "final"
-                  )
-                }
-                className="bg-blue-600 hover:bg-blue-500 text-white"
-              >
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{ overflow: "hidden", position: "relative" }}
-            >
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white relative z-10 overflow-hidden"
-              >
-                Submit
-                <span
-                  className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 hover:opacity-100 transition-opacity duration-300"
-                  style={{ zIndex: -1 }}
-                />
-              </Button>
-            </motion.div>
-          )}
-        </div>
-      </form>
-    </Form>
+      </motion.div>
+    </AnimatePresence>
   );
 }

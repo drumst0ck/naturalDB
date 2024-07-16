@@ -382,77 +382,82 @@ export function Chat({ db, id }) {
     );
   }
   return (
-    <div className="flex relative flex-col h-[calc(100vh-126px)] z-20 w-full bg-[#1e1e1e] text-white font-mono">
+    <div className="relative w-full h-[calc(100vh-126px)]">
       {isLoading && (
         <motion.div
-          className="absolute inset-0 rounded-lg z-1 pointer-events-none"
+          className="absolute inset-0 z-0 pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <div
-            className="absolute inset-0 rounded-lg"
+            className="absolute inset-0 animate-gradient-x opacity-50"
             style={{
               background:
-                "linear-gradient(45deg, #ff00ff,#22d3ee, #9333ea, #ec4899)",
-              animation: "gradientAnimation 2s ease infinite",
-              mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              maskComposite: "exclude",
-              WebkitMask:
-                "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              WebkitMaskComposite: "xor",
-              padding: "3px",
+                "linear-gradient(45deg, #ff00ff, #22d3ee, #9333ea, #ec4899)",
+              backgroundSize: "400% 400%",
+              filter: "blur(20px)",
             }}
           />
         </motion.div>
       )}
-      <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">
-        <div className="flex space-x-2 mr-4">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f56]">
-            <Link className="h-3 w-3" href="/dashboard"></Link>
+
+      <div className="absolute inset-0 z-10">
+        <div className="flex flex-col h-full bg-[#1e1e1e] text-white font-mono rounded-lg overflow-hidden">
+          <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">
+            <div className="flex space-x-2 mr-4">
+              <div className="w-3 h-3 rounded-full bg-[#ff5f56]">
+                <Link className="h-3 w-3" href="/dashboard"></Link>
+              </div>
+              <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+              <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+            </div>
+            <div className="flex-grow text-center text-sm">bash</div>
+            <Button
+              onClick={() => setIsDBViewerOpen(true)}
+              variant="ghost"
+              size="sm"
+              className="p-1"
+            >
+              <Database className="h-4 w-4 text-[#E0E0E0]" />
+            </Button>
           </div>
-          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-          <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <AnimatePresence>
+              {messages.map((message) => renderMessage(message))}
+            </AnimatePresence>
+            {isLoading && (
+              <div className="flex items-center text-[#5ad4e6]">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span>Processing...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t border-[#323232] bg-[#1e1e1e] p-4">
+            <form
+              ref={formRef}
+              onSubmit={onSubmit}
+              className="flex items-center"
+            >
+              <div className="flex-grow flex items-center bg-[#2a2a2a] rounded p-2">
+                <span className="text-[#5ad4e6] mr-2">$</span>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message..."
+                  className="flex-grow bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 outline-none"
+                />
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="flex-grow text-center text-sm">bash</div>
-        <Button
-          onClick={() => setIsDBViewerOpen(true)}
-          variant="ghost"
-          size="sm"
-          className="p-1"
-        >
-          <Database className="h-4 w-4 text-[#E0E0E0]" />
-        </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <AnimatePresence>
-          {messages.map((message) => renderMessage(message))}
-        </AnimatePresence>
-        {isLoading && (
-          <div className="flex items-center text-[#5ad4e6]">
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <span>Processing...</span>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="border-t border-[#323232] bg-[#1e1e1e] p-4">
-        <form ref={formRef} onSubmit={onSubmit} className="flex items-center">
-          <div className="flex-grow flex items-center bg-[#2a2a2a] rounded p-2">
-            <span className="text-[#5ad4e6] mr-2">$</span>
-            <input
-              type="text"
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              className="flex-grow bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 outline-none"
-            />
-          </div>
-        </form>
-      </div>
       <DBViewerPopup
         isOpen={isDBViewerOpen}
         onClose={() => setIsDBViewerOpen(false)}
