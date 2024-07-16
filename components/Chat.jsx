@@ -3,7 +3,7 @@ import { APIKeyPopup } from "./APIKeyPopup";
 import { Button } from "@/components/ui/button";
 import { useChat } from "ai/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Play, Code, Table, Database, Trash2 } from "lucide-react";
+import { Loader2, Play, Code, Table, Database, Eraser } from "lucide-react";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
 import {
@@ -430,7 +430,7 @@ export function Chat({ db, id }) {
                 className="p-1"
                 title="Clear console"
               >
-                <Trash2 className="h-4 w-4 text-[#E0E0E0]" />
+                <Eraser className="h-4 w-4 text-[#E0E0E0]" />
               </Button>
               <Button
                 onClick={() => setIsDBViewerOpen(true)}
