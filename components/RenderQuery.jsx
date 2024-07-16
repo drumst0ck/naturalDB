@@ -9,8 +9,6 @@ import {
 import { renderSQLCode } from "@/lib/utils";
 
 const RenderQuery = (result, viewMode) => {
-  console.log(result);
-
   const extractJsonArray = (str) => {
     const match = str.match(/\[[\s\S]*\]/);
     if (match) {
