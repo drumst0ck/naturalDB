@@ -111,11 +111,24 @@ export function Chat({ db, id }) {
 
   const toggleMessageView = (messageId) => {
     setMessages((prevMessages) =>
-      prevMessages.map((msg) =>
-        msg.id === messageId
-          ? { ...msg, viewMode: msg.viewMode === "table" ? "json" : "table" }
-          : msg
-      )
+      prevMessages.map((msg) => {
+        if (msg.id === messageId) {
+          let viewMode = msg.viewMode === "table" ? "json" : "table";
+          let content = msg.content;
+          if (
+            typeof content === "string" &&
+            content.startsWith("Query Result:")
+          ) {
+            content = content.replace("Query Result:\n\n", "");
+          }
+          const extractedJson = extractJsonFromString(content);
+          if (extractedJson) {
+            content = extractedJson;
+          }
+          return { ...msg, viewMode, content };
+        }
+        return msg;
+      })
     );
   };
 
