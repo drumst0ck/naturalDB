@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Play, Code, Table, Database, Eraser } from "lucide-react";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
+
 import {
   isSafeSQL,
   formatTimestamp,
@@ -15,8 +16,10 @@ import {
 const STORAGE_KEY_PREFIX = "chat_history_";
 import { DBViewerPopup } from "./DBViewerPopup";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export function Chat({ db, id }) {
+  const router = useRouter();
   const [isDBViewerOpen, setIsDBViewerOpen] = useState(false);
   const [viewMode, setViewMode] = useState("table");
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -37,10 +40,12 @@ export function Chat({ db, id }) {
 
   useEffect(() => {
     const storedApiKey = localStorage.getItem("openai_api_key");
-    if (storedApiKey) {
+    if (!storedApiKey) {
+      router.push("/dashboard");
+    } else {
       setOpenaiApiKey(storedApiKey);
     }
-  }, []);
+  }, [router]);
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === "openai_api_key") {
