@@ -384,6 +384,25 @@ export function Chat({ db, id }) {
   }
   return (
     <div className="flex flex-col h-[calc(100vh-126px)] w-full bg-[#1e1e1e] text-white font-mono">
+      {isLoading && (
+        <motion.div
+          className="absolute inset-0 rounded-lg z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <div
+            className="absolute inset-0 rounded-lg"
+            style={{
+              background:
+                "linear-gradient(45deg, #ff00ff, #00ff00, #0000ff, #ff0000, #ffff00)",
+              backgroundSize: "400% 400%",
+              animation: "gradientAnimation 15s ease infinite",
+            }}
+          />
+          <div className="absolute inset-[3px] rounded-lg bg-[#1e1e1e]" />
+        </motion.div>
+      )}
       <div className="bg-[#323232] p-2 rounded-t-lg flex items-center">
         <div className="flex space-x-2 mr-4">
           <div className="w-3 h-3 rounded-full bg-[#ff5f56]">

@@ -20,7 +20,6 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-fill-color: transparent;
 }
 body {
   background-color: black;
@@ -40,4 +39,15 @@ body {
 .background-animate {
   background-size: 400%;
   animation: gradientBorder 3s ease infinite;
+}
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
