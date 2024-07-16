@@ -20,7 +20,7 @@ export const DBViewerPopup = ({ isOpen, onClose, dbConfig }) => {
             </Button>
           </div>
           <div className="flex-grow p-4 overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto h-full">
               <RealTimeDBViewer dbConfig={dbConfig} />
             </div>
           </div>

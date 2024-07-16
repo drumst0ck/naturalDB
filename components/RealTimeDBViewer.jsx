@@ -45,7 +45,7 @@ export default function RealTimeDBViewer({ dbConfig }) {
   });
 
   const renderTableList = () => (
-    <div className="bg-[#2D2D2D] p-4 rounded-lg overflow-y-auto h-[calc(100vh-150px)]">
+    <div className="bg-[#2D2D2D] p-4 rounded-lg overflow-y-auto h-full">
       <h2 className="text-[#E0E0E0] text-lg mb-4">Database Tables</h2>
       {tables?.map((table) => (
         <div
@@ -62,7 +62,7 @@ export default function RealTimeDBViewer({ dbConfig }) {
   );
 
   const renderTableData = () => (
-    <div className="bg-[#2D2D2D] p-4 rounded-lg overflow-auto h-[calc(100vh-150px)]">
+    <div className="bg-[#2D2D2D] p-4 rounded-lg overflow-auto h-full">
       <h2 className="text-[#E0E0E0] text-lg mb-4">{selectedTable} Data</h2>
       {dataLoading ? (
         <Loader2 className="h-8 w-8 animate-spin text-[#E0E0E0]" />
@@ -104,9 +104,9 @@ export default function RealTimeDBViewer({ dbConfig }) {
   );
 
   return (
-    <div className="flex space-x-4 p-4 bg-[#1E1E1E] text-[#E0E0E0] font-mono">
+    <div className="flex space-x-4 h-full p-4 bg-[#1E1E1E] text-[#E0E0E0] font-mono">
       <div className="w-1/3">{renderTableList()}</div>
-      <div className="w-2/3">
+      <div className="w-2/3 h-full">
         {selectedTable ? (
           renderTableData()
         ) : (

@@ -15,7 +15,9 @@ export async function POST(req) {
 
     const client = await pool.connect();
     try {
-      const result = await client.query(`SELECT * FROM ${tableName} LIMIT 100`);
+      const result = await client.query(
+        `SELECT * FROM ${tableName} ORDER BY id DESC LIMIT 300;`
+      );
       return NextResponse.json(result.rows);
     } finally {
       client.release();

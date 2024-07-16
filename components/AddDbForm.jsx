@@ -77,7 +77,7 @@ export function AddDbForm({ onClose }) {
         </pre>
       ),
     });
-    onClose();
+    onClose(false);
     setIsLoading(false);
   }
 
@@ -109,16 +109,21 @@ export function AddDbForm({ onClose }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-[20px]"
+        onClick={() => onClose(false)}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           className="bg-[#1e1e1e] rounded-lg p-6 w-full max-w-md text-white font-mono"
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="bg-[#323232] p-2 rounded-t-lg flex items-center mb-4">
             <div className="flex space-x-2">
-              <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+              <div
+                className="w-3 h-3 rounded-full bg-[#ff5f56] cursor-pointer"
+                onClick={() => onClose(false)}
+              ></div>
               <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
               <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
             </div>
