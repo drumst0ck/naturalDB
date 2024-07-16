@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Loader2, Play, Code, Table } from "lucide-react";
@@ -15,18 +15,11 @@ const ChatMessages = ({
   isLoading,
   selectedMessage,
   setSelectedMessage,
-  viewMode,
-  setViewMode,
   copiedStates,
   setCopiedStates,
   executeQuery,
+  toggleMessageView,
 }) => {
-  const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   const renderMessage = (message) => {
     const isSelected = selectedMessage === message.id;
     const isSQL =
@@ -82,24 +75,26 @@ const ChatMessages = ({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setViewMode(viewMode === "table" ? "json" : "table");
+                      toggleMessageView(message.id);
                     }}
                     variant="outline"
                     size="sm"
                     className="text-xs flex gap-2"
                   >
-                    {viewMode === "table" ? (
+                    {message.viewMode === "table" ? (
                       <Code className="h-4 w-4" />
                     ) : (
                       <Table className="h-4 w-4" />
                     )}
-                    {viewMode === "table" ? "View as JSON" : "View as Table"}
+                    {message.viewMode === "table"
+                      ? "View as JSON"
+                      : "View as Table"}
                   </Button>
                 )}
               </div>
               {RenderQuery(
                 message.content.replace("Query Result:\n\n", ""),
-                viewMode
+                message.viewMode || "json"
               )}
             </div>
           ) : isSQL && !isInitialMessage ? (
@@ -142,7 +137,6 @@ const ChatMessages = ({
           <span>Processing...</span>
         </div>
       )}
-      <div ref={messagesEndRef} />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Database, Eraser } from "lucide-react";
 import { motion } from "framer-motion";
@@ -17,12 +17,12 @@ import {
 
 export function Chat({ db, id }) {
   const [isDBViewerOpen, setIsDBViewerOpen] = useState(false);
-  const [viewMode, setViewMode] = useState("table");
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [dbSchema, setDbSchema] = useState(null);
   const [copiedStates, setCopiedStates] = useState({});
   const [openaiApiKey, setOpenaiApiKey] = useState("");
   const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
+  const chatContainerRef = useRef(null);
 
   const {
     messages,
@@ -80,6 +80,11 @@ export function Chat({ db, id }) {
     if (messages.length > 0) {
       saveMessages(id, messages);
     }
+
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
   }, [messages, id]);
 
   const handleClearConsole = () => clearConsole(setMessages, id);
@@ -87,6 +92,31 @@ export function Chat({ db, id }) {
   const handleExecuteQuery = async (query) => {
     const result = await executeQuery(query, db);
     addQueryResultMessage(result);
+  };
+
+  const handleMessageSelect = (messageId) => {
+    setSelectedMessage(messageId);
+    const messageElement = document.getElementById(`message-${messageId}`);
+    if (messageElement && chatContainerRef.current) {
+      const containerRect = chatContainerRef.current.getBoundingClientRect();
+      const messageRect = messageElement.getBoundingClientRect();
+      const scrollTop = chatContainerRef.current.scrollTop;
+      const centerOffset = (containerRect.height - messageRect.height) / 2;
+      chatContainerRef.current.scrollTo({
+        top: messageRect.top + scrollTop - containerRect.top - centerOffset,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const toggleMessageView = (messageId) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, viewMode: msg.viewMode === "table" ? "json" : "table" }
+          : msg
+      )
+    );
   };
 
   if (showApiKeyPopup) {
@@ -167,17 +197,18 @@ export function Chat({ db, id }) {
             </div>
           </div>
 
-          <ChatMessages
-            messages={messages}
-            isLoading={isLoading}
-            selectedMessage={selectedMessage}
-            setSelectedMessage={setSelectedMessage}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            copiedStates={copiedStates}
-            setCopiedStates={setCopiedStates}
-            executeQuery={handleExecuteQuery}
-          />
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto">
+            <ChatMessages
+              messages={messages}
+              isLoading={isLoading}
+              selectedMessage={selectedMessage}
+              setSelectedMessage={handleMessageSelect}
+              copiedStates={copiedStates}
+              setCopiedStates={setCopiedStates}
+              executeQuery={handleExecuteQuery}
+              toggleMessageView={toggleMessageView}
+            />
+          </div>
 
           <ChatInput
             input={input}
