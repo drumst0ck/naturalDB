@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Play, Code, Table, Database, Eraser } from "lucide-react";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
-
 import {
   isSafeSQL,
   formatTimestamp,
