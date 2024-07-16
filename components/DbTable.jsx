@@ -88,7 +88,7 @@ const DbRow = ({ db, onDelete }) => {
           </span>
         )}
       </TableCell>
-      <TableCell className="text-center py-4">
+      <TableCell className="text-center py-4 hidden md:table-cell">
         <span className="px-2 py-1 bg-gray-700 rounded-full text-sm">
           {db.type}
         </span>
@@ -146,7 +146,7 @@ const DbTable = () => {
             <TableHead className="text-left text-gray-400 py-4">
               Database
             </TableHead>
-            <TableHead className="text-center text-gray-400 py-4">
+            <TableHead className="text-center text-gray-400 py-4 hidden md:table-cell">
               Type
             </TableHead>
             <TableHead className="text-center text-gray-400 py-4">
