@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Database, Eraser } from "lucide-react";
 import { motion } from "framer-motion";
@@ -23,6 +23,8 @@ export function Chat({ db, id }) {
   const [openaiApiKey, setOpenaiApiKey] = useState("");
   const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
   const chatContainerRef = useRef(null);
+  const lastMessageRef = useRef(null);
+  const prevMessagesLengthRef = useRef(0);
 
   const {
     messages,
@@ -37,7 +39,14 @@ export function Chat({ db, id }) {
     initialMessages: loadMessages(id),
     body: { dbConfig: db, openaiApiKey },
   });
-
+  const scrollToBottom = useCallback(() => {
+    if (chatContainerRef.current) {
+      const scrollHeight = chatContainerRef.current.scrollHeight;
+      const height = chatContainerRef.current.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      chatContainerRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+    }
+  }, []);
   useEffect(() => {
     const storedApiKey = localStorage.getItem("openai_api_key");
     if (storedApiKey) {
@@ -81,13 +90,20 @@ export function Chat({ db, id }) {
       saveMessages(id, messages);
     }
 
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+    if (messages.length > prevMessagesLengthRef.current) {
+      prevMessagesLengthRef.current = messages.length;
+      setSelectedMessage(null);
+      setTimeout(scrollToBottom, 0);
     }
-  }, [messages, id]);
+  }, [messages, id, scrollToBottom]);
 
-  const handleClearConsole = () => clearConsole(setMessages, id);
+  const handleClearConsole = () => {
+    const clearedMessages = clearConsole(setMessages, id);
+    setMessages(clearedMessages);
+    setSelectedMessage(null);
+    prevMessagesLengthRef.current = 0;
+    setTimeout(scrollToBottom, 0);
+  };
 
   const handleExecuteQuery = async (query) => {
     const result = await executeQuery(query, db);
@@ -212,6 +228,7 @@ export function Chat({ db, id }) {
 
           <div ref={chatContainerRef} className="flex-1 overflow-y-auto">
             <ChatMessages
+              lastMessageRef={lastMessageRef}
               messages={messages}
               isLoading={isLoading}
               selectedMessage={selectedMessage}

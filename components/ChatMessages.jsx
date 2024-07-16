@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Loader2, Play, Code, Table } from "lucide-react";
@@ -19,7 +19,16 @@ const ChatMessages = ({
   setCopiedStates,
   executeQuery,
   toggleMessageView,
+  isLastMessage,
 }) => {
+  const [executingQueries, setExecutingQueries] = useState({});
+
+  const handleExecuteQuery = async (messageId, query) => {
+    setExecutingQueries((prev) => ({ ...prev, [messageId]: true }));
+    await executeQuery(query);
+    setExecutingQueries((prev) => ({ ...prev, [messageId]: false }));
+  };
+
   const renderMessage = (message) => {
     const isSelected = selectedMessage === message.id;
     const isSQL =
@@ -34,10 +43,12 @@ const ChatMessages = ({
       ? extractJsonFromString(message.content)
       : null;
     const canRenderAsTable = extractedJson !== null;
+    const isExecuting = executingQueries[message.id];
 
     return (
       <motion.div
         key={message.id}
+        ref={isLastMessage ? lastMessageRef : null}
         id={`message-${message.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -113,12 +124,17 @@ const ChatMessages = ({
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                executeQuery(message.content);
+                handleExecuteQuery(message.id, message.content);
               }}
               className="self-start mt-2 bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
+              disabled={isExecuting}
             >
-              <Play className="h-4 w-4 mr-2" />
-              Execute Query
+              {isExecuting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Play className="h-4 w-4 mr-2" />
+              )}
+              {isExecuting ? "Executing..." : "Execute Query"}
             </Button>
           )}
         </div>
