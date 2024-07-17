@@ -111,8 +111,8 @@ export function Chat({ db, id }) {
     const results = await executeQuery(query, db);
     results.forEach((result) => {
       const content = result.success
-        ? result.message || JSON.stringify(result.result, null, 2)
-        : result.message;
+        ? result.result.message || JSON.stringify(result.result, null, 2)
+        : result.result.message;
       addQueryResultMessage(content);
     });
   };
@@ -145,6 +145,7 @@ export function Chat({ db, id }) {
             content = content.replace("Query Result:\n\n", "");
           }
           const extractedJson = extractJsonFromString(content);
+          console.log("Extracted JSON:", extractedJson);
           if (extractedJson) {
             content = extractedJson;
           }

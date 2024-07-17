@@ -30,18 +30,16 @@ const ChatMessages = ({
   };
 
   const renderMessage = (message) => {
+    console.log(message);
     const isSelected = selectedMessage === message.id;
     const isSQL =
       message.content &&
       typeof message.content === "string" &&
       isSafeSQL(message.content);
-    const isQueryResult =
-      message.role === "system" && message.content.startsWith("Query Result:");
+    const isQueryResult = message.role === "system" && message.content;
     const isUser = message.role === "user";
     const isInitialMessage = message.id === "initial-message";
-    const extractedJson = isQueryResult
-      ? extractJsonFromString(message.content)
-      : null;
+    const extractedJson = isQueryResult ? message.content : null;
     const canRenderAsTable = extractedJson !== null;
     const isExecuting = executingQueries[message.id];
 
@@ -103,10 +101,7 @@ const ChatMessages = ({
                   </Button>
                 )}
               </div>
-              {RenderQuery(
-                message.content.replace("Query Result:\n\n", ""),
-                message.viewMode || "json"
-              )}
+              {RenderQuery(message.content, message.viewMode || "json")}
             </div>
           ) : isSQL && !isInitialMessage ? (
             <RenderSQLCode
