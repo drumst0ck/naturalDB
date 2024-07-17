@@ -40,6 +40,7 @@ export function Chat({ db, id }) {
     initialMessages: loadMessages(id),
     body: { dbConfig: db, openaiApiKey },
   });
+
   const scrollToBottom = useCallback(() => {
     if (chatContainerRef.current) {
       const scrollHeight = chatContainerRef.current.scrollHeight;
@@ -99,16 +100,21 @@ export function Chat({ db, id }) {
   }, [messages, id, scrollToBottom]);
 
   const handleClearConsole = () => {
-    const clearedMessages = clearConsole(setMessages, id);
+    const clearedMessages = clearConsole(setMessages, id, dbSchema);
     setMessages(clearedMessages);
     setSelectedMessage(null);
-    prevMessagesLengthRef.current = 0;
+    prevMessagesLengthRef.current = clearedMessages.length;
     setTimeout(scrollToBottom, 0);
   };
 
   const handleExecuteQuery = async (query) => {
-    const result = await executeQuery(query, db);
-    addQueryResultMessage(result);
+    const results = await executeQuery(query, db);
+    results.forEach((result) => {
+      const content = result.success
+        ? result.message || JSON.stringify(result.result, null, 2)
+        : result.message;
+      addQueryResultMessage(content);
+    });
   };
 
   const handleMessageSelect = (messageId) => {

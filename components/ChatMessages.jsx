@@ -30,6 +30,7 @@ const ChatMessages = ({
   };
 
   const renderMessage = (message) => {
+    console.log(message);
     const isSelected = selectedMessage === message.id;
     const isSQL =
       message.content &&
