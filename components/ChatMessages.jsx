@@ -101,6 +101,7 @@ const ChatMessages = ({
                   </Button>
                 )}
               </div>
+
               {RenderQuery(message.content, message.viewMode || "json")}
             </div>
           ) : isSQL && !isInitialMessage ? (

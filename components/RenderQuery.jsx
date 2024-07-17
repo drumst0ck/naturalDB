@@ -6,7 +6,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { renderSQLCode } from "@/lib/utils";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+
+const formatJSON = (data) => {
+  if (typeof data === "string") {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {
+      return data; // Return as is if it's not valid JSON
+    }
+  }
+  return JSON.stringify(data, null, 2);
+};
 
 const RenderQuery = (result, viewMode) => {
   const extractArray = (data) => {
@@ -23,14 +35,7 @@ const RenderQuery = (result, viewMode) => {
 
   if (viewMode === "table") {
     try {
-      let data;
-      if (typeof result === "string") {
-        data = result;
-      } else {
-        data = result;
-      }
-
-      const arrayData = extractArray(data);
+      const arrayData = extractArray(result);
 
       if (arrayData && arrayData.length > 0) {
         const columns = Object.keys(arrayData[0]);
@@ -60,8 +65,37 @@ const RenderQuery = (result, viewMode) => {
     } catch (error) {
       console.error("Error parsing or rendering data:", error);
     }
+  } else if (viewMode === "json") {
+    return (
+      <SyntaxHighlighter
+        language="json"
+        style={vscDarkPlus}
+        customStyle={{
+          background: "transparent",
+          padding: "1em",
+          margin: "0",
+          borderRadius: "4px",
+        }}
+      >
+        {formatJSON(result)}
+      </SyntaxHighlighter>
+    );
   }
-  return renderSQLCode(result);
+
+  return (
+    <SyntaxHighlighter
+      language="sql"
+      style={vscDarkPlus}
+      customStyle={{
+        background: "transparent",
+        padding: "1em",
+        margin: "0",
+        borderRadius: "4px",
+      }}
+    >
+      {result}
+    </SyntaxHighlighter>
+  );
 };
 
 export default RenderQuery;

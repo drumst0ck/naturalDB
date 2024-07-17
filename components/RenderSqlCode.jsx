@@ -2,12 +2,14 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Check, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { extractJsonFromString } from "@/lib/chatUtils";
 export const RenderSQLCode = ({
   sql,
   messageId,
   setCopiedStates,
   copiedStates,
 }) => {
+  console.log("SQL:", sql);
   return (
     <div className="relative">
       <SyntaxHighlighter

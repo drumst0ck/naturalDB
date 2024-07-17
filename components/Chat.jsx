@@ -138,6 +138,7 @@ export function Chat({ db, id }) {
         if (msg.id === messageId) {
           let viewMode = msg.viewMode === "table" ? "json" : "table";
           let content = msg.content;
+          console.log("Content:", content);
           if (
             typeof content === "string" &&
             content.startsWith("Query Result:")
