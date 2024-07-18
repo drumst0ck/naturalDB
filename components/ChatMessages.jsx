@@ -9,7 +9,6 @@ import {
   formatTimestamp,
   extractJsonFromString,
 } from "./../lib/chatUtils";
-import FormattedJSONDisplay from "./FormattedJSONDisplay";
 
 const ChatMessages = ({
   messages,
@@ -31,6 +30,7 @@ const ChatMessages = ({
   };
 
   const renderMessage = (message) => {
+    console.log(message);
     const isSelected = selectedMessage === message.id;
     const isSQL =
       message.content &&
@@ -102,16 +102,7 @@ const ChatMessages = ({
                 )}
               </div>
 
-              {message.viewMode === "table" ? (
-                RenderQuery(
-                  message.content.replace("Query Result:\n\n", ""),
-                  "table"
-                )
-              ) : (
-                <FormattedJSONDisplay
-                  jsonString={message.content.replace("Query Result:\n\n", "")}
-                />
-              )}
+              {RenderQuery(message.content, message.viewMode || "json")}
             </div>
           ) : isSQL && !isInitialMessage ? (
             <RenderSQLCode
