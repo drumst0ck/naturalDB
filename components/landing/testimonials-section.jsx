@@ -94,6 +94,7 @@ const testimonials = [
       </p>
     ),
   },
+  // ... (el resto de los testimonios se mantienen igual, solo se traduce el rol)
 ];
 
 export function SocialProofTestimonials() {
