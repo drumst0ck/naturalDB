@@ -45,7 +45,11 @@ export async function POST(req) {
         affectedRows: result.rowCount,
       };
     } else {
-      processedResult = result.rows;
+      if (result.rows.length > 0) {
+        processedResult = result.rows;
+      } else {
+        processedResult = { message: "Operation successful. No data returned" };
+      }
     }
 
     await client.query("COMMIT");

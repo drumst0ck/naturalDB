@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Play, Code, Table } from "lucide-react";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
-import {
-  isSafeSQL,
-  formatTimestamp,
-  extractJsonFromString,
-} from "./../lib/chatUtils";
+import { isSafeSQL, formatTimestamp } from "./../lib/chatUtils";
 
 const ChatMessages = ({
   messages,
@@ -30,7 +26,6 @@ const ChatMessages = ({
   };
 
   const renderMessage = (message) => {
-    console.log(message);
     const isSelected = selectedMessage === message.id;
     const isSQL =
       message.content &&

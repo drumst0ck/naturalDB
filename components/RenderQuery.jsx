@@ -14,7 +14,7 @@ const formatJSON = (data) => {
     try {
       data = JSON.parse(data);
     } catch (e) {
-      return data; // Return as is if it's not valid JSON
+      return data;
     }
   }
   return JSON.stringify(data, null, 2);
