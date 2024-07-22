@@ -15,7 +15,7 @@ export default function FormContainer({ children }) {
       ) : (
         <>
           <Button onClick={() => setOpen(true)}>
-            <Plus />
+            <Plus color="white" />
           </Button>
         </>
       )}
