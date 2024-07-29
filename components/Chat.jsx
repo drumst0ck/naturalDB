@@ -15,6 +15,7 @@ import {
   saveMessages,
   extractJsonFromString,
 } from "../lib/chatUtils";
+import { formatSchemaForDisplay } from "../lib/utils";
 
 export function Chat({ db, id }) {
   const [isDBViewerOpen, setIsDBViewerOpen] = useState(false);
@@ -79,13 +80,28 @@ export function Chat({ db, id }) {
         });
         const schema = await response.text();
         setDbSchema(schema);
+
+        if (
+          messages.length === 0 ||
+          !messages[0].content.includes("I have analyzed your database schema")
+        ) {
+          const initialMessage = {
+            id: "initial-message",
+            role: "assistant",
+            content: `Hi! I have analyzed your database schema. Here is a summary:
+${formatSchemaForDisplay(schema)}
+I am ready to help you with queries related to this database, what would you like to know?`,
+          };
+          setMessages((prevMessages) => [initialMessage, ...prevMessages]);
+          saveMessages(id, [initialMessage, ...messages]);
+        }
       } catch (error) {
         console.error("Error fetching database schema:", error);
       }
     };
 
     fetchDbSchema();
-  }, [db]);
+  }, [db, id, messages, setMessages]);
 
   useEffect(() => {
     if (messages.length > 0) {
