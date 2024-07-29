@@ -123,9 +123,12 @@ export function AddDbForm({ onClose }) {
               <div
                 className="w-3 h-3 rounded-full bg-[#ff5f56] cursor-pointer"
                 onClick={() => onClose(false)}
-              ></div>
-              <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-              <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+                onKeyDown={(e) => e.key === 'Enter' && onClose(false)}
+                role="button"
+                tabIndex={0}
+              />
+              <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+              <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
             </div>
           </div>
 
