@@ -47,8 +47,8 @@ const FormSchema = z.object({
   password: z.string().min(2, {
     message: "Password must be at least 2 characters.",
   }),
-  port: z.string().min(4, {
-    message: "Port must be at least 4 characters.",
+  port: z.string().min(2, {
+    message: "Port must be at least 2 characters.",
   }),
   database: z.string({ required_error: "Please add your DB name" }),
 });
