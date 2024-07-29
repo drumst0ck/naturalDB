@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,13 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useQueryClient } from "@tanstack/react-query";
 import { localStorageDBManager } from "@/lib/localStorageDBManager";
@@ -32,25 +25,16 @@ import {
   ArrowRight,
   ArrowLeft,
   Loader2,
+  Link as LinkIcon,
 } from "lucide-react";
 
 const FormSchema = z.object({
-  type: z.string({
-    required_error: "Please select a DB type",
-  }),
-  host: z.string().min(2, {
-    message: "Host must be at least 2 characters.",
-  }),
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  password: z.string().min(2, {
-    message: "Password must be at least 2 characters.",
-  }),
-  port: z.string().min(2, {
-    message: "Port must be at least 2 characters.",
-  }),
-  database: z.string({ required_error: "Please add your DB name" }),
+  connectionString: z.string().optional(),
+  host: z.string().optional(),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  port: z.string().optional(),
+  database: z.string().optional(),
 });
 
 export function AddDbForm({ onClose }) {
@@ -62,36 +46,157 @@ export function AddDbForm({ onClose }) {
   const [fase, setFase] = useState("privacy");
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [useConnectionString, setUseConnectionString] = useState(false);
+
+  useEffect(() => {
+    form.reset();
+  }, [useConnectionString, form]);
+
+  function parseConnectionString(connectionString) {
+    try {
+      // Remove the protocol if present
+      const withoutProtocol = connectionString.replace(
+        /^postgres(ql)?:\/\//,
+        ""
+      );
+
+      // Split the string into credentials and host parts
+      const [credentials, hostPart] = withoutProtocol.split("@");
+
+      // Parse credentials
+      let username, password;
+      if (credentials.includes(":")) {
+        [username, password] = credentials.split(":");
+      } else {
+        username = credentials;
+        password = "";
+      }
+
+      // Parse host part
+      const [hostAndPort, database] = hostPart.split("/");
+      const [host, port] = hostAndPort.split(":");
+
+      return {
+        host,
+        port: port || "5432", // Default to 5432 if no port is specified
+        username,
+        password,
+        database,
+        type: "postgres",
+      };
+    } catch (error) {
+      console.error("Error parsing connection string:", error);
+      return null;
+    }
+  }
 
   async function onSubmit(data) {
     setIsLoading(true);
-    localStorageDBManager.saveToDB(data);
-    queryClient.invalidateQueries(["databases"]);
-    toast({
-      title: "Your DB has been added with the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">
-            {JSON.stringify({ ...data, password: "****" }, null, 2)}
-          </code>
-        </pre>
-      ),
-    });
-    onClose(false);
-    setIsLoading(false);
+    let dbData;
+
+    if (useConnectionString) {
+      if (!data.connectionString) {
+        toast({
+          title: "Error",
+          description: "Connection string is required",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      dbData = parseConnectionString(data.connectionString);
+      if (!dbData) {
+        toast({
+          title: "Error",
+          description: "Invalid connection string",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+    } else {
+      if (
+        !data.host ||
+        !data.username ||
+        !data.password ||
+        !data.port ||
+        !data.database
+      ) {
+        toast({
+          title: "Error",
+          description: "All fields are required for manual input",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      dbData = { ...data, type: "postgres" };
+    }
+
+    try {
+      localStorageDBManager.saveToDB(dbData);
+      queryClient.invalidateQueries(["databases"]);
+      toast({
+        title: "Success",
+        description: "Your database has been added successfully",
+      });
+      onClose(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save database: " + error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function next(actual, siguiente) {
-    if (actual === "privacy") {
-      setFase(siguiente);
-    } else {
-      const values = form.getValues();
-      if (!values[actual] || form.getFieldState(actual).error) {
-        form.setError(actual, { message: "This field is required" });
-      } else {
-        form.clearErrors(actual);
-        setFase(siguiente);
+    const values = form.getValues();
+    let canProceed = true;
+
+    if (useConnectionString) {
+      if (actual === "connection" && !values.connectionString) {
+        form.setError("connectionString", {
+          message: "Connection string is required",
+        });
+        canProceed = false;
       }
+    } else {
+      switch (actual) {
+        case "connection":
+          if (!values.host) {
+            form.setError("host", { message: "Host is required" });
+            canProceed = false;
+          }
+          break;
+        case "details":
+          if (!values.port || !values.database) {
+            if (!values.port)
+              form.setError("port", { message: "Port is required" });
+            if (!values.database)
+              form.setError("database", {
+                message: "Database name is required",
+              });
+            canProceed = false;
+          }
+          break;
+        case "credentials":
+          if (!values.username || !values.password) {
+            if (!values.username)
+              form.setError("username", { message: "Username is required" });
+            if (!values.password)
+              form.setError("password", { message: "Password is required" });
+            canProceed = false;
+          }
+          break;
+      }
+    }
+
+    if (canProceed) {
+      form.clearErrors();
+      setFase(siguiente);
     }
   }
 
@@ -123,7 +228,7 @@ export function AddDbForm({ onClose }) {
               <div
                 className="w-3 h-3 rounded-full bg-[#ff5f56] cursor-pointer"
                 onClick={() => onClose(false)}
-                onKeyDown={(e) => e.key === 'Enter' && onClose(false)}
+                onKeyDown={(e) => e.key === "Enter" && onClose(false)}
                 role="button"
                 tabIndex={0}
               />
@@ -153,77 +258,99 @@ export function AddDbForm({ onClose }) {
                     </p>
                   </>
                 )}
-                {fase === "type" && (
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center">
-                          <Database className="mr-2" /> Database Type
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-[#2a2a2a] border-gray-700 text-white">
-                              <SelectValue placeholder="Select your current DB type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-[#2a2a2a] border-gray-700">
-                            <SelectItem value="postgres">Postgres</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {fase === "host" && (
-                  <FormField
-                    control={form.control}
-                    name="host"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center">
-                          <Server className="mr-2" /> Host
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="127.0.0.1"
-                            {...field}
-                            className="bg-[#2a2a2a] border-gray-700 text-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {fase === "port" && (
-                  <FormField
-                    control={form.control}
-                    name="port"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center">
-                          <Key className="mr-2" /> Port
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="1234"
-                            {...field}
-                            className="bg-[#2a2a2a] border-gray-700 text-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {fase === "final" && (
+                {fase === "connection" && (
                   <>
+                    <h2 className="text-xl mb-4">Connection Method</h2>
+                    <div className="flex flex-col space-y-2 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => setUseConnectionString(false)}
+                        className={`text-left px-4 py-2 rounded ${
+                          !useConnectionString
+                            ? "bg-[#2a2a2a] text-[#5ad4e6]"
+                            : "bg-transparent text-white"
+                        } hover:bg-[#3a3a3a] transition-colors duration-200`}
+                      >
+                        <span className="text-[#5ad4e6] mr-2">$</span>
+                        Manual Input
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setUseConnectionString(true)}
+                        className={`text-left px-4 py-2 rounded ${
+                          useConnectionString
+                            ? "bg-[#2a2a2a] text-[#5ad4e6]"
+                            : "bg-transparent text-white"
+                        } hover:bg-[#3a3a3a] transition-colors duration-200`}
+                      >
+                        <span className="text-[#5ad4e6] mr-2">$</span>
+                        Connection String
+                      </button>
+                    </div>
+                    {useConnectionString ? (
+                      <FormField
+                        control={form.control}
+                        name="connectionString"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center">
+                              <LinkIcon className="mr-2" /> Connection String
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="postgresql://user:password@host:port/database"
+                                {...field}
+                                className="bg-[#2a2a2a] border-gray-700 text-white"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name="host"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center">
+                              <Server className="mr-2" /> Host
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="127.0.0.1"
+                                {...field}
+                                className="bg-[#2a2a2a] border-gray-700 text-white"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </>
+                )}
+                {fase === "details" && !useConnectionString && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="port"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center">
+                            <Key className="mr-2" /> Port
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="5432"
+                              {...field}
+                              className="bg-[#2a2a2a] border-gray-700 text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="database"
@@ -243,6 +370,10 @@ export function AddDbForm({ onClose }) {
                         </FormItem>
                       )}
                     />
+                  </>
+                )}
+                {fase === "credentials" && !useConnectionString && (
+                  <>
                     <FormField
                       control={form.control}
                       name="username"
@@ -253,7 +384,7 @@ export function AddDbForm({ onClose }) {
                           </FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="root"
+                              placeholder="postgres"
                               {...field}
                               className="bg-[#2a2a2a] border-gray-700 text-white"
                             />
@@ -290,13 +421,11 @@ export function AddDbForm({ onClose }) {
                     type="button"
                     onClick={() =>
                       setFase(
-                        fase === "type"
+                        fase === "connection"
                           ? "privacy"
-                          : fase === "host"
-                          ? "type"
-                          : fase === "port"
-                          ? "host"
-                          : "port"
+                          : fase === "details"
+                          ? "connection"
+                          : "details"
                       )
                     }
                     className="bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
@@ -304,19 +433,20 @@ export function AddDbForm({ onClose }) {
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                   </Button>
                 )}
-                {fase !== "final" ? (
+                {fase !==
+                (useConnectionString ? "connection" : "credentials") ? (
                   <Button
                     type="button"
                     onClick={() =>
                       next(
                         fase,
                         fase === "privacy"
-                          ? "type"
-                          : fase === "type"
-                          ? "host"
-                          : fase === "host"
-                          ? "port"
-                          : "final"
+                          ? "connection"
+                          : fase === "connection"
+                          ? useConnectionString
+                            ? "connection"
+                            : "details"
+                          : "credentials"
                       )
                     }
                     className="bg-[#4a4a4a] hover:bg-[#5a5a5a] text-white"
