@@ -61,7 +61,7 @@ export async function POST(req) {
 
         Generate the SQL query based on the user's request, following these guidelines and performing a final syntax verification before providing the answer. Remember, do not number the queries if multiple are provided; simply separate them with semicolons.`;
 
-    const model = openai.chat("gpt-3.5-turbo");
+    const model = openai.chat("gpt-4o");
     const result = await streamText({
       model: model,
       messages: convertToCoreMessages([
