@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { StreamingTextResponse, streamText } from "ai";
+import { StreamingTextResponse, streamText, convertToCoreMessages } from "ai";
 import getDBSchema from "../../../lib/getDBSchema";
 import { createOpenAI } from "@ai-sdk/openai";
 
@@ -64,10 +64,10 @@ export async function POST(req) {
     const model = openai.chat("gpt-3.5-turbo");
     const result = await streamText({
       model: model,
-      messages: [
+      messages: convertToCoreMessages([
         { role: "system", content: systemMessage },
         { role: "user", content: prompt },
-      ],
+      ]),
     });
     return new StreamingTextResponse(result.toAIStream());
   } catch (error) {
