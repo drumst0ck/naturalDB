@@ -5,6 +5,7 @@ import { Loader2, Play, Code, Table } from "lucide-react";
 import RenderQuery from "./RenderQuery";
 import { RenderSQLCode } from "./RenderSqlCode";
 import { isSafeSQL, formatTimestamp } from "./../lib/chatUtils";
+import { formatSchemaForDisplay } from "@/lib/utils";
 
 const ChatMessages = ({
   messages,
@@ -71,7 +72,26 @@ const ChatMessages = ({
               {formatTimestamp(message.timestamp)}
             </span>
           </div>
-          {isQueryResult ? (
+          {isInitialMessage ? (
+            <>
+              {message.schema && (
+                <div className="overflow-x-auto">
+                  <p className="mt-4">
+                    This is a summary of the database schema:
+                  </p>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: formatSchemaForDisplay(message.schema),
+                    }}
+                  />
+                </div>
+              )}
+              <p className="mt-4">
+                I am ready to help you with queries related to this database,
+                what would you like to know?
+              </p>
+            </>
+          ) : isQueryResult ? (
             <div>
               <div className="flex justify-between items-center mb-2">
                 <span>Query Result:</span>
