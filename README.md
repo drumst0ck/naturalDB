@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# NaturalDB
 
-## Getting Started
+![NaturalDB Logo](https://dbai-gamma.vercel.app/_next/image?url=https%3A%2F%2Fsupabase.drumstock.dev%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fglorieta%2Flogofinal.png%3Ft%3D2024-07-18T10%253A17%253A39.991Z&w=256&q=75)
 
-First, run the development server:
+NaturalDB is an open-source project that revolutionizes database interaction by
+allowing users to query and manage their databases using natural language. With
+a focus on privacy and ease of use, this tool is perfect for developers, data
+analysts, and database administrators looking for a more intuitive way to work
+with their data.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Originally created for the midudev and Vercel hackathon, NaturalDB has grown
+into a powerful solution for simplifying database interactions through natural
+language processing.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- 🗣️ Natural language queries for database interactions
+- 🔒 Privacy-focused: all data and API keys are stored locally
+- 📊 Real-time database schema visualization
+- 💬 Interactive chat interface for query refinement
+- 🔄 Support for multiple database connections
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Demo
 
-## Learn More
+## Quick Start
 
-To learn more about Next.js, take a look at the following resources:
+1. Clone the repository:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```
+   git clone https://github.com/drumst0ck/naturalDB.git
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+2. Install dependencies:
 
-## Deploy on Vercel
+   ```
+   cd naturalDB
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Start the development server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+   ```
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## How It Works
+
+1. User inputs a natural language query
+2. The AI processes the query and generates SQL
+3. SQL is executed on the connected database
+4. Results are displayed in a user-friendly format
+
+## Contributing
+
+We welcome contributions from the community!
+
+## Roadmap
+
+- [ ] Integration with Ollama for enhanced privacy
+- [ ] Implement cronjob creation and management for database tasks (e.g.,
+      backups)
+- [ ] Add functionality to create new databases from within the app
+- [ ] Support for more database types (MySQL, MongoDB, etc.)
+- [ ] Implement data visualization features
+
+## Screenshots
+
+## License
+
+This project is licensed under the MIT License
+
+---
+
+Made with ❤️ by drumst0ck
