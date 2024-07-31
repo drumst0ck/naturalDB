@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "NaturalDB | PostgreSQL Queries with Natural Language",
+  title: "NaturalDB | Dashboard",
   description:
     "Communicate with your PostgreSQL database using everyday language, no SQL expertise required.",
 };
