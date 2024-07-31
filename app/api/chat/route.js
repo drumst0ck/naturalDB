@@ -64,10 +64,10 @@ export async function POST(req) {
     const model = openai.chat("gpt-4o");
     const result = await streamText({
       model: model,
-      messages: convertToCoreMessages([
+      messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: prompt },
-      ]),
+      ],
     });
     return new StreamingTextResponse(result.toAIStream());
   } catch (error) {
