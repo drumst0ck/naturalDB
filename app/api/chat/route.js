@@ -28,10 +28,12 @@ export async function POST(req) {
     const systemMessage = `You are an AI assistant specialized in generating SQL queries for PostgreSQL based on natural language requests.
         Use the following database schema to generate accurate SQL queries:
         ${dbSchema}
+        You should remember the scheme if you are asked about it again.
 
         Generate only the SQL query without any additional explanation or numbering. Ensure the query is compatible with the provided schema and PostgreSQL syntax.
 
         IMPORTANT:
+        You should remember the scheme if you are asked about it again.
         For all queries:
         - Use PostgreSQL-specific syntax and data types.
         - Perform a final syntax check before providing the response.
