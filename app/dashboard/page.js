@@ -2,6 +2,7 @@ import FormContainer from "@/components/FormContainer";
 import { AddDbForm } from "@/components/AddDbForm";
 import { Suspense } from "react";
 import DBTable from "@/components/DbTable";
+
 export default async function Dashboard() {
   return (
     <>

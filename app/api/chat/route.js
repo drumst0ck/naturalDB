@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { StreamingTextResponse, streamText, convertToCoreMessages } from "ai";
+import { StreamingTextResponse, streamText } from "ai";
 import getDBSchema from "../../../lib/getDBSchema";
 import { createOpenAI } from "@ai-sdk/openai";
 
