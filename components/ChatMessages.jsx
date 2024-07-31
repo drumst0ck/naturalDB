@@ -76,7 +76,7 @@ const ChatMessages = ({
             <>
               {message.schema && (
                 <div className="overflow-x-auto">
-                  <p className="mt-4">
+                  <p className="my-4">
                     This is a summary of the database schema:
                   </p>
                   <div
@@ -86,7 +86,7 @@ const ChatMessages = ({
                   />
                 </div>
               )}
-              <p className="mt-4">
+              <p className="my-4">
                 I am ready to help you with queries related to this database,
                 what would you like to know?
               </p>
