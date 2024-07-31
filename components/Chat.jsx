@@ -14,8 +14,8 @@ import {
   loadMessages,
   saveMessages,
   extractJsonFromString,
+  initializeChat,
 } from "../lib/chatUtils";
-import { formatSchemaForDisplay } from "../lib/utils";
 
 export function Chat({ db, id }) {
   const [isDBViewerOpen, setIsDBViewerOpen] = useState(false);
@@ -38,7 +38,7 @@ export function Chat({ db, id }) {
     addQueryResultMessage,
   } = useChat({
     api: "/api/chat",
-    initialMessages: loadMessages(id),
+    initialMessages: [],
     body: { dbConfig: db, openaiApiKey },
   });
 
@@ -50,6 +50,14 @@ export function Chat({ db, id }) {
       chatContainerRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     }
   }, []);
+
+  useEffect(() => {
+    const initChat = async () => {
+      await initializeChat(db, setDbSchema, setMessages, id);
+    };
+    initChat();
+  }, [db, id]);
+
   useEffect(() => {
     const storedApiKey = localStorage.getItem("openai_api_key");
     if (storedApiKey) {
@@ -69,39 +77,6 @@ export function Chat({ db, id }) {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-
-  useEffect(() => {
-    const fetchDbSchema = async () => {
-      try {
-        const response = await fetch("/api/get-db-schema", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(db),
-        });
-        const schema = await response.text();
-        setDbSchema(schema);
-
-        if (
-          messages.length === 0 ||
-          !messages[0].content.includes("I have analyzed your database schema")
-        ) {
-          const initialMessage = {
-            id: "initial-message",
-            role: "assistant",
-            content: `Hi! I have analyzed your database schema. Here is a summary:
-${formatSchemaForDisplay(schema)}
-I am ready to help you with queries related to this database, what would you like to know?`,
-          };
-          setMessages((prevMessages) => [initialMessage, ...prevMessages]);
-          saveMessages(id, [initialMessage, ...messages]);
-        }
-      } catch (error) {
-        console.error("Error fetching database schema:", error);
-      }
-    };
-
-    fetchDbSchema();
-  }, [db, id, messages, setMessages]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -128,7 +103,7 @@ I am ready to help you with queries related to this database, what would you lik
     results.forEach((result) => {
       const content = result.success
         ? result.result.message || JSON.stringify(result.result, null, 2)
-        : result.result.message;
+        : result.message;
       addQueryResultMessage(content);
     });
   };
