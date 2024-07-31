@@ -16,13 +16,6 @@ export default function Home() {
             productivity and simplify data analysis.
           </p>
           <div className="flex justify-center space-x-4">
-            <Link
-              className="bg-emerald-500 hover:bg-emerald-600 h-[50px] text-white px-8 py-3 rounded-full transition-all duration-300"
-              href="/dashboard"
-            >
-              Try Dashboard
-            </Link>
-
             <Button
               variant="outline"
               className="border-emerald-500 h-[50px] text-emerald-500 hover:bg-emerald-500 hover:text-white px-8 py-3 rounded-full transition-all duration-300"
@@ -69,54 +62,12 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center mb-12">
             Empower Your Data Team with AI-Assisted Database Querying
           </h2>
-          <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            <CallToActionCard
-              title="Intuitive Dashboard"
-              description="Access powerful database insights through our user-friendly interface."
-              buttonText="Explore Dashboard"
-              buttonLink="/dashboard"
-            />
-            <CallToActionCard
-              title="Secure Authentication"
-              description="Protect your data with our robust sign-in and sign-up processes, ensuring only authorized access."
-              buttonText="Sign In"
-              buttonLink="/sign-in"
-            />
-          </div>
         </div>
       </section>
-      <footer className="bg-gray-900 py-12 relative">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-4">
-            <FooterColumn
-              title="Features"
-              links={[
-                "Natural Language Queries",
-                "Real-time SQL Generation",
-                "Data Visualization",
-                "Query History",
-              ]}
-            />
-            <FooterColumn
-              title="Resources"
-              links={["Documentation", "API Reference", "Tutorials", "Blog"]}
-            />
-            <FooterColumn
-              title="Company"
-              links={["About Us", "Careers", "Contact", "Partners"]}
-            />
-            <FooterColumn
-              title="Legal"
-              links={[
-                "Privacy Policy",
-                "Terms of Service",
-                "Cookie Policy",
-                "Security",
-              ]}
-            />
-          </div>
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; 2024 Your Company Name. All rights reserved.</p>
+      <footer className="bg-gray-900">
+        <div className="container mx-auto py-4 flex justify-center items-center w-full px-4">
+          <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
+            <p>&copy; 2024 NaturalDB by drumst0ck. All rights reserved.</p>
           </div>
         </div>
       </footer>
