@@ -23,6 +23,7 @@ export function Chat({ db, id }) {
   const [dbSchema, setDbSchema] = useState(null);
   const [copiedStates, setCopiedStates] = useState({});
   const [openaiApiKey, setOpenaiApiKey] = useState("");
+  const [initialMessages, setInitialMessages] = useState([]);
   const [showApiKeyPopup, setShowApiKeyPopup] = useState(false);
   const chatContainerRef = useRef(null);
   const lastMessageRef = useRef(null);
@@ -38,7 +39,7 @@ export function Chat({ db, id }) {
     addQueryResultMessage,
   } = useChat({
     api: "/api/chat",
-    initialMessages: [],
+    initialMessages: initialMessages,
     body: { dbConfig: db, openaiApiKey },
   });
 
@@ -53,10 +54,12 @@ export function Chat({ db, id }) {
 
   useEffect(() => {
     const initChat = async () => {
-      await initializeChat(db, setDbSchema, setMessages, id);
+      const loadedMessages = await initializeChat(db, setDbSchema, id);
+      setInitialMessages(loadedMessages);
+      setMessages(loadedMessages);
     };
     initChat();
-  }, [db, id]);
+  }, [db, id, setMessages]);
 
   useEffect(() => {
     const storedApiKey = localStorage.getItem("openai_api_key");
