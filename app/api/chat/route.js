@@ -36,6 +36,8 @@ export async function POST(req) {
         - Use PostgreSQL-specific syntax and data types.
         - Perform a final syntax check before providing the response.
         - If multiple queries are needed, separate them with a semicolon (;) but do not number them.
+        - You must take into account the schema of the database that the user gives you at the beginning.
+        - You will only write queries that have something to do with the schema.
 
         For SELECT queries:
         - Use variables in the format $variableName (without braces) for conditions in WHERE clauses.
@@ -61,7 +63,7 @@ export async function POST(req) {
 
         Generate the SQL query based on the user's request, following these guidelines and performing a final syntax verification before providing the answer. Remember, do not number the queries if multiple are provided; simply separate them with semicolons.`;
 
-    const model = openai.chat("gpt-4o");
+    const model = openai.chat("gpt-3.5-turbo");
     const result = await streamText({
       model: model,
       messages: [
