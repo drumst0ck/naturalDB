@@ -94,7 +94,7 @@ export function Chat({ db, id }) {
   }, [messages, id, scrollToBottom]);
 
   const handleClearConsole = () => {
-    const clearedMessages = clearConsole(setMessages, id, dbSchema);
+    const clearedMessages = clearConsole(id, dbSchema);
     setMessages(clearedMessages);
     setSelectedMessage(null);
     prevMessagesLengthRef.current = clearedMessages.length;
